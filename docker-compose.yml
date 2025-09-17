@@ -1,0 +1,40 @@
+version: '3.8'
+services:
+  postgres:
+    image: postgres:15
+    environment:
+      POSTGRES_DB: webshield
+      POSTGRES_USER: webshield_user
+      POSTGRES_PASSWORD: webshield_secure_2024
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./database/schema.sql:/docker-entrypoint-initdb.d/schema.sql
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    ports:
+      - "5000:5000"
+    environment:
+      DB_HOST: postgres
+      DB_NAME: webshield
+      DB_USER: webshield_user
+      DB_PASSWORD: webshield_secure_2024
+      JWT_SECRET: production_jwt_secret_change_me
+    depends_on:
+      - postgres
+
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    ports:
+      - "3000:80"
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:

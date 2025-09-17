@@ -1,6 +1,4 @@
-// WebShield Backend - Node.js + PostgreSQL
-// Archivo: server.js
-
+//modulos
 const express = require('express');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
@@ -11,35 +9,27 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// Middleware
+// Middleware para la app
 app.use(cors());
 app.use(express.json());
-
-// Configuración de la base de datos PostgreSQL
 const pool = new Pool({
-  user: process.env.DB_USER || 'postgres',
-  host: process.env.DB_HOST || 'localhost',
-  database: process.env.DB_NAME || 'webshield',
-  password: process.env.DB_PASSWORD || 'password',
-  port: process.env.DB_PORT || 5432,
+  //.env
+  connectionString: process.env.DATABASE_URL || "postgresql://webshield100_user:nBXSSmtz0yjIoabpbUajZxYMo5A5l8jD@dpg-d353kte3jp1c73env300-a.oregon-postgres.render.com/webshield100",
+  ssl: {
+    rejectUnauthorized: false,
+  },
 });
 
-// JWT Secret
-const JWT_SECRET = process.env.JWT_SECRET || 'webshield_super_secret_key_2024';
+const JWT_SECRET = process.env.JWT_SECRET || 'HKYG!@@#*UIHGV@!#HGGHQHNBXBZJHKJH_9712381209JHJKh1802308huY*';
 
-// Middleware para verificar JWT
+// Middleware para verificar JWT (tokens)
 const authenticateToken = async (req, res, next) => {
   const authHeader = req.headers['authorization'];
   const token = authHeader && authHeader.split(' ')[1];
-
-  if (!token) {
-    return res.status(401).json({ error: 'Token de acceso requerido' });
-  }
+  if (!token) return res.status(401).json({ error: 'Token requerido' });
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
-
-    // Verificar que el usuario existe y obtener datos actuales
     const userResult = await pool.query(
       'SELECT id, email, plan FROM usuarios WHERE id = $1',
       [decoded.userId]
@@ -52,10 +42,9 @@ const authenticateToken = async (req, res, next) => {
     req.user = userResult.rows[0];
     next();
   } catch (error) {
-    return res.status(403).json({ error: 'Token no válido' });
+    return res.status(403).json({ error: 'Token inválido' });
   }
 };
-
 // Middleware para verificar planes
 const requirePlan = (allowedPlans) => {
   return (req, res, next) => {
@@ -69,9 +58,7 @@ const requirePlan = (allowedPlans) => {
     next();
   };
 };
-
-// ==================== RUTAS DE AUTENTICACIÓN ====================
-
+//autenticaciones
 // Registro de usuario
 app.post('/api/auth/register', async (req, res) => {
   const { email, password, plan = 'free' } = req.body;
@@ -498,22 +485,7 @@ process.on('SIGINT', async () => {
   console.log('🔄 Cerrando servidor...');
   await pool.end();
   process.exit(0);
-}); ({
-  message: 'Inicio de sesión exitoso',
-  user: {
-    id: user.id,
-    email: user.email,
-    plan: user.plan
-  },
-  token
 });
-
-  } catch (error) {
-  console.error('Error en login:', error);
-  res.status(500).json({ error: 'Error interno del servidor' });
-}
-});
-
 // Obtener perfil del usuario
 app.get('/api/auth/profile', authenticateToken, async (req, res) => {
   try {
@@ -1019,8 +991,17 @@ app.get('/api/projects/:id/export', authenticateToken, requirePlan(['pro', 'prem
     const project = projectResult.rows[0];
     const elements = elementsResult.rows;
 
-    // Generar HTML
+    // Generar HTML del proyecto
     const html = generateHTML(project.name, elements);
 
-    res.json
+    return res.json({
+      project,
+      elements,
+      html
+    });
 
+  } catch (error) {
+    console.error('Error exportando proyecto:', error);
+    return res.status(500).json({ error: 'Error interno' });
+  }
+});
