@@ -1,14 +1,13 @@
 -- Crear base de datos
-CREATE DATABASE webshield;
+--CREATE DATABASE IF NOT EXISTS webshield;
 
 -- Usar la base de datos
 \c webshield;
 
--- Extensión para UUIDs (opcional, pero recomendada)
 CREATE EXTENSION IF NOT EXISTS "uuid-ossp";
 
 -- Tabla de usuarios
-CREATE TABLE usuarios (
+CREATE TABLE IF NOT EXISTS usuarios (
     id SERIAL PRIMARY KEY,
     email VARCHAR(255) UNIQUE NOT NULL,
     password VARCHAR(255) NOT NULL,
@@ -18,7 +17,7 @@ CREATE TABLE usuarios (
 );
 
 -- Tabla de proyectos
-CREATE TABLE proyectos (
+CREATE TABLE IF NOT EXISTS proyectos(
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,
     user_id INTEGER NOT NULL,
@@ -28,7 +27,7 @@ CREATE TABLE proyectos (
 );
 
 -- Tabla de elementos
-CREATE TABLE elementos (
+CREATE TABLE IF NOT EXISTS elementos  (
     id SERIAL PRIMARY KEY,
     project_id INTEGER NOT NULL,
     type VARCHAR(50) NOT NULL CHECK (type IN ('text', 'image', 'button', 'form', 'gallery', 'menu')),
@@ -40,7 +39,7 @@ CREATE TABLE elementos (
 );
 
 -- Tabla de pagos
-CREATE TABLE pagos (
+CREATE TABLE IF NOT EXISTS pagos  (
     id SERIAL PRIMARY KEY,
     user_id INTEGER NOT NULL,
     plan VARCHAR(20) NOT NULL CHECK (plan IN ('free', 'pro', 'premium')),
@@ -53,12 +52,12 @@ CREATE TABLE pagos (
 );
 
 -- Índices para optimizar consultas
-CREATE INDEX idx_usuarios_email ON usuarios(email);
-CREATE INDEX idx_proyectos_user_id ON proyectos(user_id);
-CREATE INDEX idx_elementos_project_id ON elementos(project_id);
-CREATE INDEX idx_elementos_order ON elementos(project_id, order_position);
-CREATE INDEX idx_pagos_user_id ON pagos(user_id);
-CREATE INDEX idx_pagos_status ON pagos(status);
+CREATE INDEX IF NOT EXISTS idx_usuarios_email ON usuarios(email);
+CREATE INDEX IF NOT EXISTS idx_proyectos_user_id ON proyectos(user_id);
+CREATE INDEX IF NOT EXISTS idx_elementos_project_id ON elementos(project_id);
+CREATE INDEX IF NOT EXISTS idx_elementos_order ON elementos(project_id, order_position);
+CREATE INDEX IF NOT EXISTS idx_pagos_user_id ON pagos(user_id);
+CREATE INDEX IF NOT EXISTS idx_pagos_status ON pagos(status);
 
 -- Función para actualizar timestamp automáticamente
 CREATE OR REPLACE FUNCTION update_updated_at_column()
@@ -70,10 +69,10 @@ END;
 $$ language 'plpgsql';
 
 -- Triggers para actualizar updated_at automáticamente
-CREATE TRIGGER update_usuarios_updated_at BEFORE UPDATE ON usuarios FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-CREATE TRIGGER update_proyectos_updated_at BEFORE UPDATE ON proyectos FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-CREATE TRIGGER update_elementos_updated_at BEFORE UPDATE ON elementos FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
-CREATE TRIGGER update_pagos_updated_at BEFORE UPDATE ON pagos FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE IF NOT EXISTS TRIGGER update_usuarios_updated_at BEFORE UPDATE ON usuarios FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE IF NOT EXISTS TRIGGER update_proyectos_updated_at BEFORE UPDATE ON proyectos FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE IF NOT EXISTS TRIGGER update_elementos_updated_at BEFORE UPDATE ON elementos FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
+CREATE IF NOT EXISTS TRIGGER update_pagos_updated_at BEFORE UPDATE ON pagos FOR EACH ROW EXECUTE FUNCTION update_updated_at_column();
 
 -- Datos de ejemplo para testing
 INSERT INTO usuarios (email, password, plan) VALUES 
