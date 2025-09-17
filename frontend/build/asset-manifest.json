@@ -1,0 +1,15 @@
+{
+  "files": {
+    "main.css": "/webshield/static/css/main.8c0cdbfa.css",
+    "main.js": "/webshield/static/js/main.afd57cf5.js",
+    "static/js/453.a0a5890f.chunk.js": "/webshield/static/js/453.a0a5890f.chunk.js",
+    "index.html": "/webshield/index.html",
+    "main.8c0cdbfa.css.map": "/webshield/static/css/main.8c0cdbfa.css.map",
+    "main.afd57cf5.js.map": "/webshield/static/js/main.afd57cf5.js.map",
+    "453.a0a5890f.chunk.js.map": "/webshield/static/js/453.a0a5890f.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.8c0cdbfa.css",
+    "static/js/main.afd57cf5.js"
+  ]
+}
