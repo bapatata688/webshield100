@@ -34,7 +34,7 @@ const sanitizeinput = (req, res, next) => {
   next();
 };
 
-app.use(sanitizeinput); const { pool } = require('pg');
+app.use(sanitizeinput);
 const joi = require('joi');
 require('dotenv').config();
 
