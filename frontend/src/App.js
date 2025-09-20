@@ -19,7 +19,10 @@ import {
   CheckCircle,
   AlertTriangle,
   Plus,
-  Trash2
+  Trash2,
+  Copy,
+  Undo2,
+  Redo2
 } from 'lucide-react';
 
 const WebShield = () => {
@@ -32,6 +35,8 @@ const WebShield = () => {
   const [showPayment, setShowPayment] = useState(false);
   const [currentProject] = useState({ name: 'Mi Proyecto WebShield', elements: [] });
   const [draggedItem, setDraggedItem] = useState(null);
+  const [history, setHistory] = useState([]);
+  const [historyIndex, setHistoryIndex] = useState(-1);
 
   const elements = {
     free: [
@@ -74,6 +79,43 @@ const WebShield = () => {
     }
   ];
 
+  // Función para agregar al historial
+  const addToHistory = (elements) => {
+    const newHistory = history.slice(0, historyIndex + 1);
+    newHistory.push([...elements]);
+    setHistory(newHistory);
+    setHistoryIndex(newHistory.length - 1);
+  };
+
+  // Funciones de Undo/Redo
+  const undo = () => {
+    if (historyIndex > 0) {
+      setHistoryIndex(historyIndex - 1);
+      setDraggedElements([...history[historyIndex - 1]]);
+    }
+  };
+
+  const redo = () => {
+    if (historyIndex < history.length - 1) {
+      setHistoryIndex(historyIndex + 1);
+      setDraggedElements([...history[historyIndex + 1]]);
+    }
+  };
+
+  // Función para actualizar el elemento seleccionado
+  const updateSelectedElement = (property, value) => {
+    if (selectedElement === null) return;
+
+    const newElements = [...draggedElements];
+    if (!newElements[selectedElement].settings) {
+      newElements[selectedElement].settings = {};
+    }
+    newElements[selectedElement].settings[property] = value;
+
+    setDraggedElements(newElements);
+    addToHistory(newElements);
+  };
+
   const handleDragStart = (e, element, fromCanvas = false, canvasIndex = null) => {
     setDraggedItem({ element, fromCanvas, canvasIndex, id: fromCanvas ? `canvas-${canvasIndex}` : element.id });
     e.dataTransfer.effectAllowed = 'move';
@@ -88,33 +130,82 @@ const WebShield = () => {
     e.preventDefault();
     if (!draggedItem) return;
 
+    let newElements;
     if (draggedItem.fromCanvas && targetIndex !== null) {
-      const newElements = [...draggedElements];
+      newElements = [...draggedElements];
       const [movedElement] = newElements.splice(draggedItem.canvasIndex, 1);
       newElements.splice(targetIndex, 0, movedElement);
-      setDraggedElements(newElements);
     } else if (!draggedItem.fromCanvas) {
-      const newElement = { ...draggedItem.element, id: `${draggedItem.element.id}-${Date.now()}`, settings: {} };
-      const newElements = [...draggedElements];
+      const newElement = {
+        ...draggedItem.element,
+        id: `${draggedItem.element.id}-${Date.now()}`,
+        settings: {
+          content: getDefaultContent(draggedItem.element.type),
+          color: '#3B82F6',
+          size: 'medium',
+          link: '',
+          imageUrl: ''
+        }
+      };
+      newElements = [...draggedElements];
       if (targetIndex !== null) {
         newElements.splice(targetIndex, 0, newElement);
       } else {
         newElements.push(newElement);
       }
+    }
+
+    if (newElements) {
       setDraggedElements(newElements);
+      addToHistory(newElements);
     }
     setDraggedItem(null);
   };
 
+  const getDefaultContent = (type) => {
+    switch (type) {
+      case 'text':
+        return 'Este es un texto editable. Haz clic para personalizarlo.';
+      case 'button':
+        return 'Mi Botón';
+      case 'image':
+        return 'Imagen placeholder';
+      default:
+        return '';
+    }
+  };
+
   const addElement = (element) => {
-    const newElement = { ...element, id: `${element.id}-${Date.now()}`, settings: {} };
-    setDraggedElements([...draggedElements, newElement]);
+    const newElement = {
+      ...element,
+      id: `${element.id}-${Date.now()}`,
+      settings: {
+        content: getDefaultContent(element.type),
+        color: '#3B82F6',
+        size: 'medium',
+        link: '',
+        imageUrl: ''
+      }
+    };
+    const newElements = [...draggedElements, newElement];
+    setDraggedElements(newElements);
+    addToHistory(newElements);
   };
 
   const removeElement = (index) => {
     const newElements = draggedElements.filter((_, i) => i !== index);
     setDraggedElements(newElements);
+    addToHistory(newElements);
     setSelectedElement(null);
+  };
+
+  const duplicateElement = (index) => {
+    const elementToDuplicate = { ...draggedElements[index] };
+    elementToDuplicate.id = `${elementToDuplicate.type}-${Date.now()}`;
+    const newElements = [...draggedElements];
+    newElements.splice(index + 1, 0, elementToDuplicate);
+    setDraggedElements(newElements);
+    addToHistory(newElements);
   };
 
   const LoginScreen = () => {
@@ -361,37 +452,73 @@ const WebShield = () => {
   );
 
   const CanvasElement = ({ element, index }) => {
+    const settings = element.settings || {};
+    const content = settings.content || getDefaultContent(element.type);
+    const color = settings.color || '#3B82F6';
+    const link = settings.link || '';
+
+    const getSizeClasses = (size) => {
+      switch (size) {
+        case 'small': return 'text-sm p-2';
+        case 'large': return 'text-xl p-6';
+        default: return 'text-base p-4';
+      }
+    };
+
     const renderElement = () => {
+      const sizeClasses = getSizeClasses(settings.size);
+
       switch (element.type) {
         case 'text':
-          return (
-            <div className="p-4 border-2 border-dashed border-gray-300 rounded-lg bg-white hover:border-blue-400 transition-colors">
-              <h2 className="text-xl font-semibold text-gray-800">Título de ejemplo</h2>
-              <p className="text-gray-600 mt-2">Este es un párrafo de ejemplo para WebShield. Personalízalo desde el panel derecho.</p>
-            </div>
-          );
-        case 'image':
-          return (
-            <div className="p-4 border-2 border-dashed border-gray-300 rounded-lg bg-white hover:border-blue-400 transition-colors">
-              <div className="w-full h-48 bg-gray-200 rounded-lg flex items-center justify-center">
-                <div className="text-center">
-                  <Image className="w-12 h-12 text-gray-400 mx-auto mb-2" />
-                  <p className="text-gray-500 text-sm">Imagen placeholder</p>
-                </div>
+          const TextContent = () => (
+            <div className={`border-2 border-dashed border-gray-300 rounded-lg bg-white hover:border-blue-400 transition-colors ${sizeClasses}`}>
+              <div style={{ color }} className="prose max-w-none">
+                {content.split('\n').map((line, i) => (
+                  <p key={i} className="mb-2 last:mb-0">{line}</p>
+                ))}
               </div>
             </div>
           );
+
+          return link ? (
+            <a href={link} target="_blank" rel="noopener noreferrer">
+              <TextContent />
+            </a>
+          ) : <TextContent />;
+
+        case 'image':
+          const imageUrl = settings.imageUrl || '';
+          return (
+            <div className={`border-2 border-dashed border-gray-300 rounded-lg bg-white hover:border-blue-400 transition-colors ${sizeClasses}`}>
+              {imageUrl ? (
+                <img src={imageUrl} alt={content} className="w-full h-48 object-cover rounded" />
+              ) : (
+                <div className="w-full h-48 bg-gray-200 rounded-lg flex items-center justify-center">
+                  <div className="text-center">
+                    <Image className="w-12 h-12 text-gray-400 mx-auto mb-2" />
+                    <p className="text-gray-500 text-sm">{content}</p>
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+
         case 'button':
           return (
-            <div className="p-4 border-2 border-dashed border-gray-300 rounded-lg bg-white hover:border-blue-400 transition-colors">
-              <button className="bg-blue-600 text-white px-8 py-3 rounded-lg hover:bg-blue-700 transition-colors font-medium">
-                Botón WebShield
+            <div className={`border-2 border-dashed border-gray-300 rounded-lg bg-white hover:border-blue-400 transition-colors ${sizeClasses}`}>
+              <button
+                className="px-8 py-3 rounded-lg hover:opacity-80 transition-colors font-medium"
+                style={{ backgroundColor: color, color: 'white' }}
+                onClick={() => link && window.open(link, '_blank')}
+              >
+                {content}
               </button>
             </div>
           );
+
         case 'menu':
           return (
-            <div className="p-4 border-2 border-dashed border-gray-300 rounded-lg bg-white hover:border-blue-400 transition-colors">
+            <div className={`border-2 border-dashed border-gray-300 rounded-lg bg-white hover:border-blue-400 transition-colors ${sizeClasses}`}>
               <nav className="flex space-x-8">
                 <button className="text-gray-700 hover:text-blue-600 font-medium py-2">Inicio</button>
                 <button className="text-gray-700 hover:text-blue-600 font-medium py-2">Servicios</button>
@@ -399,11 +526,12 @@ const WebShield = () => {
               </nav>
             </div>
           );
+
         case 'form':
           return (
-            <div className="p-4 border-2 border-dashed border-gray-300 rounded-lg bg-white hover:border-blue-400 transition-colors">
+            <div className={`border-2 border-dashed border-gray-300 rounded-lg bg-white hover:border-blue-400 transition-colors ${sizeClasses}`}>
               <div className="bg-green-50 border border-green-200 rounded p-2 mb-4">
-                <p className="text-xs text-green-700">🔒 Formulario protegido por WebShield</p>
+                <p className="text-xs text-green-700">Formulario protegido por WebShield</p>
               </div>
               <form className="space-y-4">
                 <div>
@@ -414,15 +542,16 @@ const WebShield = () => {
                   <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
                   <input type="email" className="w-full px-3 py-2 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500" />
                 </div>
-                <button type="submit" className="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 font-medium">
+                <button type="submit" className="px-6 py-2 rounded-md font-medium text-white hover:opacity-80" style={{ backgroundColor: color }}>
                   Enviar de forma segura
                 </button>
               </form>
             </div>
           );
+
         case 'gallery':
           return (
-            <div className="p-4 border-2 border-dashed border-gray-300 rounded-lg bg-white hover:border-blue-400 transition-colors">
+            <div className={`border-2 border-dashed border-gray-300 rounded-lg bg-white hover:border-blue-400 transition-colors ${sizeClasses}`}>
               <h3 className="text-lg font-medium text-gray-800 mb-3">Galería de imágenes</h3>
               <div className="grid grid-cols-3 gap-3">
                 {[1, 2, 3, 4, 5, 6].map(i => (
@@ -433,6 +562,7 @@ const WebShield = () => {
               </div>
             </div>
           );
+
         default:
           return <div>Elemento desconocido</div>;
       }
@@ -449,15 +579,28 @@ const WebShield = () => {
       >
         {renderElement()}
 
-        <button
-          onClick={(e) => {
-            e.stopPropagation();
-            removeElement(index);
-          }}
-          className="absolute top-2 right-2 bg-red-500 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-600 shadow-lg"
-        >
-          <Trash2 className="w-4 h-4" />
-        </button>
+        <div className="absolute top-2 right-2 flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              duplicateElement(index);
+            }}
+            className="bg-blue-500 text-white p-2 rounded-full hover:bg-blue-600 shadow-lg"
+            title="Duplicar elemento"
+          >
+            <Copy className="w-4 h-4" />
+          </button>
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              removeElement(index);
+            }}
+            className="bg-red-500 text-white p-2 rounded-full hover:bg-red-600 shadow-lg"
+            title="Eliminar elemento"
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
+        </div>
       </div>
     );
   };
@@ -469,9 +612,34 @@ const WebShield = () => {
 
     const handleExport = () => {
       if (!canExport) {
-        alert('⚠️ Debes actualizar a Pro o Premium para exportar tu proyecto.\n\n🚀 ¡Obtén acceso completo y crea páginas web profesionales!');
+        alert('Debes actualizar a Pro o Premium para exportar tu proyecto.\n\nObtén acceso completo y crea páginas web profesionales!');
         return;
       }
+
+      const generateElementHTML = (element) => {
+        const settings = element.settings || {};
+        const content = settings.content || getDefaultContent(element.type);
+        const color = settings.color || '#3B82F6';
+        const link = settings.link || '';
+
+        switch (element.type) {
+          case 'text':
+            const textElement = content.split('\n').map(line => `<p>${line}</p>`).join('');
+            return link ?
+              `<a href="${link}" style="color: ${color}; text-decoration: none;">${textElement}</a>` :
+              `<div style="color: ${color};">${textElement}</div>`;
+          case 'button':
+            return link ?
+              `<a href="${link}" style="background: ${color}; color: white; padding: 12px 24px; border: none; border-radius: 6px; text-decoration: none; display: inline-block; font-weight: 600;">${content}</a>` :
+              `<button style="background: ${color}; color: white; padding: 12px 24px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600;">${content}</button>`;
+          case 'image':
+            return settings.imageUrl ?
+              `<img src="${settings.imageUrl}" alt="${content}" style="width: 100%; height: 200px; object-fit: cover; border-radius: 8px;" />` :
+              `<div style="width: 100%; height: 200px; background: #f3f4f6; border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #6b7280;">${content}</div>`;
+          default:
+            return `<div class="element">${content}</div>`;
+        }
+      };
 
       const htmlContent = `<!DOCTYPE html>
 <html lang="es">
@@ -480,11 +648,11 @@ const WebShield = () => {
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>${currentProject.name} - Creado con WebShield</title>
     <style>
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 20px; background: #f8fafc; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 20px; background: #f8fafc; line-height: 1.6; }
         .container { max-width: 1200px; margin: 0 auto; background: white; padding: 40px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); }
         .webshield-header { text-align: center; margin-bottom: 40px; padding: 20px; background: linear-gradient(135deg, #3b82f6, #8b5cf6); color: white; border-radius: 8px; }
-        .element { margin-bottom: 30px; padding: 20px; border: 2px solid #e5e7eb; border-radius: 8px; background: #ffffff; }
-        /* Protecciones WebShield incluidas */
+        .element { margin-bottom: 30px; padding: 20px; border-radius: 8px; }
+        p { margin-bottom: 1em; }
         input[type="text"], input[type="email"], textarea { 
             border: 2px solid #d1d5db; 
             padding: 12px; 
@@ -492,16 +660,7 @@ const WebShield = () => {
             width: 100%;
             box-sizing: border-box;
         }
-        button { 
-            background: #3b82f6; 
-            color: white; 
-            padding: 12px 24px; 
-            border: none; 
-            border-radius: 6px; 
-            cursor: pointer; 
-            font-weight: 600;
-        }
-        button:hover { background: #2563eb; }
+        button:hover, a:hover { opacity: 0.8; }
     </style>
 </head>
 <body>
@@ -512,8 +671,7 @@ const WebShield = () => {
         </div>
         ${draggedElements.map((el, i) => `
         <div class="element">
-            <h3>Elemento ${i + 1}: ${el.name}</h3>
-            <p>Contenido del ${el.type} protegido por WebShield</p>
+            ${generateElementHTML(el)}
         </div>`).join('')}
         <div style="text-align: center; margin-top: 40px; padding: 20px; background: #f0f9ff; border-radius: 8px;">
             <small style="color: #3b82f6;">✨ Creado con WebShield - Constructor web seguro ✨</small>
@@ -531,7 +689,8 @@ const WebShield = () => {
             const inputs = document.querySelectorAll('input, textarea');
             inputs.forEach(input => {
                 input.addEventListener('input', function() {
-                })this.value = this.value.replace(/<script[^>]*>.*?<\/script>/gi, '');;
+                    this.value = this.value.replace(/<script[^>]*>.*?<\/script>/gi, '');
+                });
             });
         });
     </script>
@@ -618,6 +777,28 @@ const WebShield = () => {
             </div>
 
             <div className="flex items-center space-x-3">
+              <button
+                onClick={undo}
+                disabled={historyIndex <= 0}
+                className={`flex items-center px-3 py-2 rounded-lg font-medium transition-colors ${historyIndex <= 0
+                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                  : 'bg-gray-300 text-gray-700 hover:bg-gray-400'
+                  }`}
+                title="Deshacer"
+              >
+                <Undo2 className="w-4 h-4" />
+              </button>
+              <button
+                onClick={redo}
+                disabled={historyIndex >= history.length - 1}
+                className={`flex items-center px-3 py-2 rounded-lg font-medium transition-colors ${historyIndex >= history.length - 1
+                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                  : 'bg-gray-300 text-gray-700 hover:bg-gray-400'
+                  }`}
+                title="Rehacer"
+              >
+                <Redo2 className="w-4 h-4" />
+              </button>
               <button
                 onClick={handleSave}
                 disabled={!canSave}
@@ -747,26 +928,46 @@ const WebShield = () => {
                     <label className="block text-sm font-medium text-gray-700 mb-2">📝 Contenido</label>
                     <textarea
                       rows="3"
+                      value={draggedElements[selectedElement]?.settings?.content || ''}
+                      onChange={(e) => updateSelectedElement('content', e.target.value)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                       placeholder="Escribe el contenido del elemento..."
                     />
                   </div>
 
+                  {draggedElements[selectedElement]?.type === 'image' && (
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-2">🖼️ URL de Imagen</label>
+                      <input
+                        type="url"
+                        value={draggedElements[selectedElement]?.settings?.imageUrl || ''}
+                        onChange={(e) => updateSelectedElement('imageUrl', e.target.value)}
+                        className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500"
+                        placeholder="https://ejemplo.com/imagen.jpg"
+                      />
+                    </div>
+                  )}
+
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">🎨 Color</label>
                     <input
                       type="color"
+                      value={draggedElements[selectedElement]?.settings?.color || '#3B82F6'}
+                      onChange={(e) => updateSelectedElement('color', e.target.value)}
                       className="w-full h-12 border border-gray-300 rounded-md cursor-pointer"
-                      defaultValue="#3B82F6"
                     />
                   </div>
 
                   <div>
                     <label className="block text-sm font-medium text-gray-700 mb-2">📐 Tamaño</label>
-                    <select className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500">
-                      <option>Pequeño</option>
-                      <option>Mediano</option>
-                      <option selected>Grande</option>
+                    <select
+                      value={draggedElements[selectedElement]?.settings?.size || 'medium'}
+                      onChange={(e) => updateSelectedElement('size', e.target.value)}
+                      className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="small">Pequeño</option>
+                      <option value="medium">Mediano</option>
+                      <option value="large">Grande</option>
                     </select>
                   </div>
 
@@ -774,18 +975,29 @@ const WebShield = () => {
                     <label className="block text-sm font-medium text-gray-700 mb-2">🔗 Enlace</label>
                     <input
                       type="url"
+                      value={draggedElements[selectedElement]?.settings?.link || ''}
+                      onChange={(e) => updateSelectedElement('link', e.target.value)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500"
                       placeholder="https://ejemplo.com"
                     />
                   </div>
 
-                  <button
-                    onClick={() => removeElement(selectedElement)}
-                    className="w-full bg-red-500 text-white py-3 px-4 rounded-md hover:bg-red-600 transition-colors flex items-center justify-center font-medium"
-                  >
-                    <Trash2 className="w-4 h-4 mr-2" />
-                    Eliminar Elemento
-                  </button>
+                  <div className="flex space-x-2">
+                    <button
+                      onClick={() => duplicateElement(selectedElement)}
+                      className="flex-1 bg-blue-500 text-white py-3 px-4 rounded-md hover:bg-blue-600 transition-colors flex items-center justify-center font-medium"
+                    >
+                      <Copy className="w-4 h-4 mr-2" />
+                      Duplicar
+                    </button>
+                    <button
+                      onClick={() => removeElement(selectedElement)}
+                      className="flex-1 bg-red-500 text-white py-3 px-4 rounded-md hover:bg-red-600 transition-colors flex items-center justify-center font-medium"
+                    >
+                      <Trash2 className="w-4 h-4 mr-2" />
+                      Eliminar
+                    </button>
+                  </div>
                 </div>
               ) : (
                 <div className="text-center py-12">
