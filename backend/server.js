@@ -5,49 +5,77 @@ const cors = require('cors');
 const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const validator = require('validator');
-const xss = require('xss-clean');
-const { Pool } = require('pg');
-const Joi = require('joi');
+const sanitizeinput = (req, res, next) => {
+  const sanitizevalue = (value) => {
+    if (typeof value === 'string') {
+      return value
+        .replace(/<script[^>]*>.*?<\/script>/gi, '')
+        .replace(/javascript:/gi, '')
+        .replace(/on\w+=/gi, '')
+        .replace(/[<>]/g, '');
+    }
+    return value;
+  };
+
+  const sanitizeobject = (obj) => {
+    for (let key in obj) {
+      if (obj[key] && typeof obj[key] === 'object') {
+        sanitizeobject(obj[key]);
+      } else {
+        obj[key] = sanitizevalue(obj[key]);
+      }
+    }
+  };
+
+  if (req.body) sanitizeobject(req.body);
+  if (req.query) sanitizeobject(req.query);
+  if (req.params) sanitizeobject(req.params);
+
+  next();
+};
+
+app.use(sanitizeinput); const { pool } = require('pg');
+const joi = require('joi');
 require('dotenv').config();
 
 const app = express();
-const PORT = process.env.PORT || 5000;
+const port = process.env.port || 5000;
 
-// ==================== MIDDLEWARES DE SEGURIDAD ====================
-// Helmet para headers de seguridad
+// ==================== middlewares de seguridad ====================
+// helmet para headers de seguridad
 app.use(helmet({
-  contentSecurityPolicy: {
+  contentsecuritypolicy: {
     directives: {
-      defaultSrc: ["'self'"],
-      styleSrc: ["'self'", "'unsafe-inline'"],
-      scriptSrc: ["'self'"],
-      imgSrc: ["'self'", "data:", "https:"],
+      defaultsrc: ["'self'"],
+      stylesrc: ["'self'", "'unsafe-inline'"],
+      scriptsrc: ["'self'"],
+      imgsrc: ["'self'", "data:", "https:"],
     },
   },
 }));
 
-// Rate limiting general
-const generalLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutos
-  max: 100, // máximo 100 requests por IP
+// rate limiting general
+const generallimiter = ratelimit({
+  windowms: 15 * 60 * 1000, // 15 minutos
+  max: 100, // máximo 100 requests por ip
   message: {
-    error: 'Demasiadas solicitudes desde esta IP. Intenta más tarde.',
+    error: 'demasiadas solicitudes desde esta ip. intenta más tarde.',
     retry_after: '15 minutes'
   },
-  standardHeaders: true,
-  legacyHeaders: false,
+  standardheaders: true,
+  legacyheaders: false,
 });
 
-// Rate limiting específico para login (protección brute force)
-const loginLimiter = rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutos
-  max: 5, // máximo 5 intentos de login por IP
+// rate limiting específico para login (protección brute force)
+const loginlimiter = ratelimit({
+  windowms: 15 * 60 * 1000, // 15 minutos
+  max: 5, // máximo 5 intentos de login por ip
   message: {
-    error: 'Demasiados intentos de inicio de sesión. Intenta en 15 minutos.',
-    security_notice: 'Por tu seguridad, hemos bloqueado temporalmente esta IP.'
+    error: 'demasiados intentos de inicio de sesión. intenta en 15 minutos.',
+    security_notice: 'por tu seguridad, hemos bloqueado temporalmente esta ip.'
   },
-  standardHeaders: true,
-  legacyHeaders: false,
+  standardheaders: true,
+  legacyheaders: false,
 });
 
 // Rate limiting para registro
@@ -62,7 +90,6 @@ const registerLimiter = rateLimit({
 app.use(generalLimiter);
 app.use(cors());
 app.use(express.json({ limit: '10mb' })); // Limitar tamaño de payload
-app.use(xss()); // Sanitización XSS
 
 // ==================== ESQUEMAS DE VALIDACIÓN ====================
 const schemas = {
