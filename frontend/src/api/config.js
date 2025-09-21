@@ -1,11 +1,15 @@
 // Configuración de la API para WebShield Frontend
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000/api';
-
+const API_BASE_URL = 'https://webshield100-backend.onrender.com/api';
+console.log('API URL forzada:', API_BASE_URL);
 // Crear instancia de fetch con configuración base
+//ZQ
 const apiCall = async (endpoint, options = {}) => {
   const url = `${API_BASE_URL}${endpoint}`;
-  
+
+  console.log('Request URL:', url);
+  console.log('Request data:', options.body);
+
   const config = {
     headers: {
       'Content-Type': 'application/json',
@@ -52,7 +56,7 @@ export const authAPI = {
 
 export const projectsAPI = {
   getAll: () => apiCall('/projects'),
-  
+
   create: (projectData) => apiCall('/projects', {
     method: 'POST',
     body: JSON.stringify(projectData),
