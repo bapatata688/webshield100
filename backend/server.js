@@ -12,6 +12,32 @@ require('dotenv').config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// Endpoint de salud del sistema
+app.get('/api/health', async (req, res) => {
+  try {
+    const dbStart = Date.now();
+    await pool.query('SELECT 1');
+    const dbTime = Date.now() - dbStart;
+
+    res.json({
+      status: 'healthy',
+      timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
+      database: {
+        status: 'connected',
+        response_time_ms: dbTime
+      },
+      memory: process.memoryUsage(),
+      version: '2.0.0'
+    });
+  } catch (error) {
+    res.status(503).json({
+      status: 'unhealthy',
+      error: 'Database connection failed',
+      timestamp: new Date().toISOString()
+    });
+  }
+});
 // ==================== MIDDLEWARES DE SEGURIDAD ====================
 // Middleware personalizado para sanitización XSS
 const sanitizeInput = (req, res, next) => {
