@@ -124,13 +124,13 @@ const schemas = {
 };
 
 // ==================== CONFIGURACIÓN DE BASE DE DATOS ====================
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL,
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
-  max: 20, // máximo 20 conexiones
-  idleTimeoutMillis: 30000,
-  connectionTimeoutMillis: 2000,
-});
+//const pool = new Pool({
+//  connectionString: process.env.DATABASE_URL,
+// .. ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false,
+//max: 20, // máximo 20 conexiones
+//idleTimeoutMillis: 30000,
+//connectionTimeoutMillis: 2000,
+//});
 
 const JWT_SECRET = process.env.JWT_SECRET;
 if (!JWT_SECRET) {
