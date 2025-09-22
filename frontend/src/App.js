@@ -1099,4 +1099,10 @@ const WebShield = () => {
   );
 };
 
+// En App.js o tu componente principal
+console.log('Environment check:', {
+  NODE_ENV: process.env.NODE_ENV,
+  API_URL: process.env.REACT_APP_API_URL,
+  all_env: Object.keys(process.env).filter(key => key.startsWith('REACT_APP'))
+});
 export default WebShield;
