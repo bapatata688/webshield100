@@ -1,5 +1,4 @@
-// Configuración de la API para WebShield Frontend
-const API_BASE_URL = 'https://webshield100-backend.onrender.com/api';
+// Configuración de la API const API_BASE_URL = 'https://webshield100-backend.onrender.com/api';
 console.log('API URL forzada:', API_BASE_URL);
 
 // Crear instancia de fetch con configuración base
@@ -17,8 +16,7 @@ const apiCall = async (endpoint, options = {}) => {
     ...options,
   };
 
-  // Agregar token si está disponible
-  const token = localStorage.getItem('webshield_token');
+  // Agregar token   const token = localStorage.getItem('webshield_token');
   if (token) {
     config.headers['Authorization'] = `Bearer ${token}`;
     console.log('Token agregado a la request');

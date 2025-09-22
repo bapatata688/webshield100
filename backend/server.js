@@ -696,7 +696,7 @@ app.delete('/api/elements/:id', authenticateToken, async (req, res) => {
   }
 });
 
-// ==================== RUTAS DE PAGOS ====================
+// RUTAS DE PAGOS 
 app.post('/api/payments/create-intent', authenticateToken, async (req, res) => {
   const { plan, amount } = req.body;
   try {
@@ -791,7 +791,6 @@ app.get('/api/payments', authenticateToken, async (req, res) => {
   }
 });
 
-// ==================== RUTAS ADICIONALES ====================
 // Guardar proyecto completo (solo Pro/Premium)
 app.post('/api/projects/:id/save', authenticateToken, requirePlan(['pro', 'premium']), async (req, res) => {
   const { id } = req.params;
@@ -1119,7 +1118,6 @@ app.get('/api/stats', authenticateToken, requirePlan(['premium']), async (req, r
   }
 });
 
-// Sistema de notificaciones
 app.get('/api/notifications', authenticateToken, async (req, res) => {
   try {
     const notifications = [];
@@ -1186,7 +1184,7 @@ function generateHTML(projectName, elements) {
         </div>`;
       case 'form':
         return `<form class="form-element">
-          <div class="security-badge">🔒 Protegido por WebShield</div>
+          <div class="security-badge"> Protegido por WebShield</div>
           <input type="text" placeholder="Nombre" required />
           <input type="email" placeholder="Email" required />
           <button type="submit">Enviar</button>
@@ -1293,7 +1291,7 @@ function generateHTML(projectName, elements) {
         </div>
         ${elementsHTML}
         <div class="webshield-footer">
-            <p>✨ Creado con WebShield - Constructor web seguro ✨</p>
+            <p> Creado con WebShield - Constructor web seguro </p>
         </div>
     </div>
     <script>
@@ -1334,26 +1332,26 @@ async function checkDatabaseConnection() {
     await createTablesIfNotExist();
 
   } catch (error) {
-    console.error('❌ Error conectando a PostgreSQL:', error);
+    console.error(' Error conectando a PostgreSQL:', error);
     process.exit(1);
   }
 }
 
 app.listen(PORT, async () => {
   await checkDatabaseConnection();
-  console.log(`🚀 WebShield Backend ejecutándose en puerto ${PORT}`);
-  console.log(`📊 Ambiente: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`🛡️ Seguridad: JWT activo`);
+  console.log(` WebShield Backend ejecutándose en puerto ${PORT}`);
+  console.log(` Ambiente: ${process.env.NODE_ENV || 'development'}`);
+  console.log(` Seguridad: JWT activo`);
 });
 
 process.on('SIGTERM', async () => {
-  console.log('🔄 Cerrando servidor...');
+  console.log(' Cerrando servidor...');
   await pool.end();
   process.exit(0);
 });
 
 process.on('SIGINT', async () => {
-  console.log('🔄 Cerrando servidor...');
+  console.log(' Cerrando servidor...');
   await pool.end();
   process.exit(0);
 });
