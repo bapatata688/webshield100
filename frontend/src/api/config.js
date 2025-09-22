@@ -22,25 +22,25 @@
 //   console.log('Token agregado a la request');
 // }
 
-try {
-  console.log('Enviando request...');
-  const response = await fetch(url, config);
-  console.log('Response status:', response.status);
-  console.log('Response headers:', [...response.headers.entries()]);
-
-  const data = await response.json();
-  console.log('Response data:', data);
-
-  if (!response.ok) {
-    throw new Error(data.error || `HTTP error! status: ${response.status}`);
-  }
-  return data;
-} catch (error) {
-  console.error('API Error:', error);
-  console.error('Error stack:', error.stack);
-  throw error;
-}
-};
+//try {
+//  console.log('Enviando request...');
+//  const response = await fetch(url, config);
+//  console.log('Response status:', response.status);
+//  console.log('Response headers:', [...response.headers.entries()]);
+//
+//  const data = await response.json();
+//  console.log('Response data:', data);
+//
+//  if (!response.ok) {
+//    throw new Error(data.error || `HTTP error! status: ${response.status}`);
+//  }
+//  //  return data;
+//} catch (error) {
+//  console.error('API Error:', error);
+//  console.error('Error stack:', error.stack);
+//  throw error;
+//}
+//};
 
 // Funciones de la API
 export const authAPI = {
