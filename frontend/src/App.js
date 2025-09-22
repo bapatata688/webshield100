@@ -24,7 +24,7 @@ import {
   Undo2,
   Redo2
 } from 'lucide-react';
-import { authAPI, storage } from 'api/config.js';
+import { authAPI, storage } from './api/config.js';
 
 const WebShield = () => {
   const [user, setUser] = useState(null);
