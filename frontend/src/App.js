@@ -24,6 +24,7 @@ import {
   Undo2,
   Redo2
 } from 'lucide-react';
+import { authAPI, storage } from './api/index.js';
 
 const WebShield = () => {
   const [user, setUser] = useState(null);
@@ -213,16 +214,36 @@ const WebShield = () => {
     const [email, setEmail] = useState('');
     const [password, setPassword] = useState('');
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
       e.preventDefault();
       if (email.trim() && password.trim()) {
-        setUser({ email: email.trim(), plan: 'free' });
-        setCurrentScreen('plans');
+        try {
+          let response;
+          if (isLogin) {
+            // Usar la API para login
+            response = await authAPI.login({ email: email.trim(), password });
+          } else {
+            // Usar la API para registro
+            response = await authAPI.register({
+              email: email.trim(),
+              password,
+              plan: 'free'
+            });
+          }
+
+          // Guardar token y usuario
+          storage.setToken(response.token);
+          setUser(response.user);
+          setCurrentScreen('plans');
+
+        } catch (error) {
+          alert(`Error: ${error.message}`);
+          console.error('Auth error:', error);
+        }
       } else {
         alert('Por favor completa todos los campos');
       }
     };
-
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center p-4">
         <div className="bg-white rounded-2xl shadow-xl p-8 w-full max-w-md">
@@ -1099,7 +1120,6 @@ const WebShield = () => {
   );
 };
 
-// En App.js o tu componente principal
 console.log('Environment check:', {
   NODE_ENV: process.env.NODE_ENV,
   API_URL: process.env.REACT_APP_API_URL,
