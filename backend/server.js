@@ -349,7 +349,7 @@ app.post('/api/auth/register', registerLimiter, validateSchema(schemas.register)
       { expiresIn: '7d' }
     );
 
-    console.log(`✅ Nuevo usuario registrado: ${user.email} (Plan: ${user.plan})`);
+    console.log(` Nuevo usuario registrado: ${user.email} (Plan: ${user.plan})`);
 
     res.status(201).json({
       message: 'Usuario creado exitosamente',
@@ -364,7 +364,7 @@ app.post('/api/auth/register', registerLimiter, validateSchema(schemas.register)
     });
 
   } catch (error) {
-    console.error('❌ Error en registro:', error);
+    console.error(' Error en registro:', error);
     res.status(500).json({
       error: 'Error interno del servidor',
       code: 'INTERNAL_ERROR'
@@ -383,7 +383,7 @@ app.post('/api/auth/login', loginLimiter, validateSchema(schemas.login), async (
     );
 
     if (result.rows.length === 0) {
-      console.log(`⚠️  Intento de login con email inexistente: ${email}`);
+      console.log(`  Intento de login con email inexistente: ${email}`);
       return res.status(401).json({
         error: 'Credenciales inválidas',
         code: 'INVALID_CREDENTIALS'
@@ -396,7 +396,7 @@ app.post('/api/auth/login', loginLimiter, validateSchema(schemas.login), async (
     const isValidPassword = await bcrypt.compare(password, user.password);
 
     if (!isValidPassword) {
-      console.log(`⚠️  Login fallido para ${email}`);
+      console.log(`  Login fallido para ${email}`);
       return res.status(401).json({
         error: 'Credenciales inválidas',
         code: 'INVALID_CREDENTIALS'
@@ -415,7 +415,7 @@ app.post('/api/auth/login', loginLimiter, validateSchema(schemas.login), async (
       { expiresIn: '7d' }
     );
 
-    console.log(`✅ Login exitoso: ${user.email}`);
+    console.log(` Login exitoso: ${user.email}`);
 
     res.json({
       message: 'Inicio de sesión exitoso',
@@ -429,7 +429,7 @@ app.post('/api/auth/login', loginLimiter, validateSchema(schemas.login), async (
     });
 
   } catch (error) {
-    console.error('❌ Error en login:', error);
+    console.error(' Error en login:', error);
     res.status(500).json({
       error: 'Error interno del servidor',
       code: 'INTERNAL_ERROR'
