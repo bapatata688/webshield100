@@ -1,13 +1,13 @@
-// Configuración de la API const API_BASE_URL = 'https://webshield100-backend.onrender.com/api';
-// console.log('API URL forzada:', API_BASE_URL);
+// Configuración de la API para WebShield Frontend
+const API_BASE_URL = 'https://webshield100-backend.onrender.com/api';
+console.log('API URL forzada:', API_BASE_URL);
 
-// Crear instancia de fetch con configuración base
 const apiCall = async (endpoint, options = {}) => {
   const url = `${API_BASE_URL}${endpoint}`;
-  //console.log('Request URL:', url);
-  //console.log('Request data:', options.body);
-  //console.log('Request method:', options.method || 'GET');
-  //
+  console.log('Request URL:', url);
+  console.log('Request data:', options.body);
+  console.log('Request method:', options.method || 'GET');
+
   const config = {
     headers: {
       'Content-Type': 'application/json',
@@ -16,13 +16,15 @@ const apiCall = async (endpoint, options = {}) => {
     ...options,
   };
 
-  // Agregar token   const token = localStorage.getItem('webshield_token');
-  // if (token) {
-  //   config.headers['Authorization'] = `Bearer ${token}`;
-  //   console.log('Token agregado a la request');
-  // }
+  // Agregar token si está disponible
+  const token = localStorage.getItem('webshield_token');
+  if (token) {
+    config.headers['Authorization'] = `Bearer ${token}`;
+    console.log('Token agregado a la request');
+  }
 
   try {
+    console.log('Enviando request...');
     const response = await fetch(url, config);
     console.log('Response status:', response.status);
     console.log('Response headers:', [...response.headers.entries()]);
@@ -33,13 +35,14 @@ const apiCall = async (endpoint, options = {}) => {
     if (!response.ok) {
       throw new Error(data.error || `HTTP error! status: ${response.status}`);
     }
-    //  return data;
+    return data;
   } catch (error) {
     console.error('API Error:', error);
     console.error('Error stack:', error.stack);
     throw error;
   }
 };
+
 // Funciones de la API
 export const authAPI = {
   register: (userData) => {
