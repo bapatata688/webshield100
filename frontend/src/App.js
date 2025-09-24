@@ -733,10 +733,10 @@ const WebShield = () => {
 
     const handleSave = () => {
       if (!canSave) {
-        alert('☁️ Debes actualizar a Pro o Premium para guardar en la nube.\n\n📦 Accede a almacenamiento seguro y sincronización automática');
+        alert('☁️ Debes actualizar a Pro o Premium para guardar en la nube.\n\n Accede a almacenamiento seguro y sincronización automática');
         return;
       }
-      alert('💾 Proyecto guardado exitosamente en la nube.\n\n🔒 Respaldo seguro con encriptación\n☁️ Disponible desde cualquier dispositivo');
+      alert('💾 Proyecto guardado exitosamente en la nube.\n\n🔒 Respaldo seguro con encriptación\n Disponible desde cualquier dispositivo');
     };
 
     if (isPreview) {
@@ -1063,7 +1063,7 @@ const WebShield = () => {
                       onClick={() => setCurrentScreen('plans')}
                       className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-4 rounded-lg hover:from-blue-700 hover:to-purple-700 text-sm font-medium transition-all shadow-sm"
                     >
-                      ✨ Actualizar Plan
+                      Actualizar Plan
                     </button>
                   </div>
                 </div>

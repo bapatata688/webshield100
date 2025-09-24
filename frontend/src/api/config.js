@@ -1,5 +1,6 @@
 // Configuración de la API para WebShield Frontend
 const API_BASE_URL = 'https://webshield100-backend.onrender.com/api';
+//comprobar que la API responda
 console.log('API URL forzada:', API_BASE_URL);
 
 const apiCall = async (endpoint, options = {}) => {
