@@ -116,7 +116,7 @@ const registerLimiter = rateLimit({
 
 app.use(generalLimiter);
 app.use(cors({
-  origin: ['https://webshield100-fronted.onrender.com', 'http://localhost:3000'],
+  origin: ['https://webshield100.onrender.com', 'http://localhost:3000', 'https://webshield100-fronted.onrender.com'],
   credentials: true
 }));
 app.use(express.json({ limit: '10mb' }));
