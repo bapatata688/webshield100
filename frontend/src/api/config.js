@@ -1,14 +1,6 @@
-// Configuración de la API para WebShield Frontend
 const API_BASE_URL = 'https://webshield100-backend.onrender.com/api';
-//comprobar que la API responda
-console.log('API URL forzada:', API_BASE_URL);
-
-const apiCall = async (endpoint, options = {}) => {
+export const apiCall = async (endpoint, options = {}) => {
   const url = `${API_BASE_URL}${endpoint}`;
-  console.log('Request URL:', url);
-  console.log('Request data:', options.body);
-  console.log('Request method:', options.method || 'GET');
-
   const config = {
     headers: {
       'Content-Type': 'application/json',
@@ -16,8 +8,7 @@ const apiCall = async (endpoint, options = {}) => {
     },
     ...options,
   };
-
-  // Agregar token si está disponible
+  // Agregar token 
   const token = localStorage.getItem('webshield_token');
   if (token) {
     config.headers['Authorization'] = `Bearer ${token}`;
@@ -46,74 +37,37 @@ const apiCall = async (endpoint, options = {}) => {
 
 // Funciones de la API
 export const authAPI = {
-  register: (userData) => {
-    console.log('Calling register with:', userData);
-    return apiCall('/auth/register', {
-      method: 'POST',
-      body: JSON.stringify(userData),
-    });
-  },
-
-  login: (credentials) => {
-    console.log('Calling login with:', { email: credentials.email, password: '[HIDDEN]' });
-    return apiCall('/auth/login', {
-      method: 'POST',
-      body: JSON.stringify(credentials),
-    });
-  },
-
-  getProfile: () => {
-    console.log('Calling getProfile');
-    return apiCall('/auth/profile');
-  },
+  register: (userData) => apiCall('/auth/register', {
+    method: 'POST',
+    body: JSON.stringify(userData),
+  }),
+  login: (credentials) => apiCall('/auth/login', {
+    method: 'POST',
+    body: JSON.stringify(credentials),
+  }),
+  getProfile: () => apiCall('/auth/profile'),
 };
 
+
 export const projectsAPI = {
-  getAll: () => {
-    console.log('Calling getAll projects');
-    return apiCall('/projects');
-  },
-
-  create: (projectData) => {
-    console.log('Calling create project with:', projectData);
-    return apiCall('/projects', {
-      method: 'POST',
-      body: JSON.stringify(projectData),
-    });
-  },
-
-  getById: (id) => {
-    console.log('Calling getById project:', id);
-    return apiCall(`/projects/${id}`);
-  },
-
-  update: (id, projectData) => {
-    console.log('Calling update project:', id, projectData);
-    return apiCall(`/projects/${id}`, {
-      method: 'PUT',
-      body: JSON.stringify(projectData),
-    });
-  },
-
-  delete: (id) => {
-    console.log('Calling delete project:', id);
-    return apiCall(`/projects/${id}`, {
-      method: 'DELETE',
-    });
-  },
-
-  save: (id, elements) => {
-    console.log('Calling save project:', id, 'with', elements.length, 'elements');
-    return apiCall(`/projects/${id}/save`, {
-      method: 'POST',
-      body: JSON.stringify({ elements }),
-    });
-  },
-
-  export: (id) => {
-    console.log('Calling export project:', id);
-    return apiCall(`/projects/${id}/export`);
-  },
+  getAll: () => apiCall('/projects'),
+  create: (projectData) => apiCall('/projects', {
+    method: 'POST',
+    body: JSON.stringify(projectData),
+  }),
+  getById: (id) => apiCall(`/projects/${id}`),
+  update: (id, projectData) => apiCall(`/projects/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(projectData),
+  }),
+  delete: (id) => apiCall(`/projects/${id}`, { method: 'DELETE' }),
+  save: (id, elements) => apiCall(`/projects/${id}/save`, {
+    method: 'POST',
+    body: JSON.stringify({ elements }),
+  }),
+  export: (id) => apiCall(`/projects/${id}/export`),
+  search: (query) => apiCall(`/projects/search?q=${encodeURIComponent(query)}`),
+  duplicate: (id) => apiCall(`/projects/${id}/duplicate`, { method: 'POST' }),
 };
 
 export const elementsAPI = {
@@ -142,33 +96,20 @@ export const elementsAPI = {
 };
 
 export const paymentsAPI = {
-  createIntent: (paymentData) => {
-    console.log('Calling create payment intent:', paymentData);
-    return apiCall('/payments/create-intent', {
-      method: 'POST',
-      body: JSON.stringify(paymentData),
-    });
-  },
-
-  confirm: (id, confirmationData) => {
-    console.log('Calling confirm payment:', id);
-    return apiCall(`/payments/${id}/confirm`, {
-      method: 'POST',
-      body: JSON.stringify(confirmationData),
-    });
-  },
-
-  getHistory: () => {
-    console.log('Calling get payment history');
-    return apiCall('/payments');
-  },
+  createIntent: (paymentData) => apiCall('/payments/create-intent', {
+    method: 'POST',
+    body: JSON.stringify(paymentData),
+  }),
+  confirm: (id, confirmationData) => apiCall(`/payments/${id}/confirm`, {
+    method: 'POST',
+    body: JSON.stringify(confirmationData),
+  }),
+  getHistory: () => apiCall('/payments'),
 };
 
 export const statsAPI = {
-  get: () => {
-    console.log('Calling get stats');
-    return apiCall('/stats');
-  },
+  get: () => apiCall('/stats'),
+
 };
 
 // Utilidades
@@ -195,5 +136,60 @@ export const storage = {
     return isLoggedIn;
   },
 };
+export const loadUserProfile = async () => {
+  try {
+    const response = await authAPI.getProfile();
+    // Retornar los datos en lugar de setear estado directamente
+    return response;
+  } catch (error) {
+    localStorage.removeItem('webshield_token');
+    throw error; // Propagar el error para que el componente lo maneje
+  }
+};
 
-export default { authAPI, projectsAPI, elementsAPI, paymentsAPI, statsAPI, storage };
+export const loadProjects = async () => {
+  try {
+    const response = await projectsAPI.getAll();
+    return response;
+  } catch (error) {
+    console.error('Error loading projects:', error);
+    throw error;
+  }
+};
+
+export const loadStats = async () => {
+  try {
+    const response = await statsAPI.get();
+    return response;
+  } catch (error) {
+    console.error('Error loading stats:', error);
+    throw error;
+  }
+};
+
+export const loadPaymentHistory = async () => {
+  try {
+    const response = await paymentsAPI.getHistory();
+    return response;
+  } catch (error) {
+    console.error('Error loading payment history:', error);
+    throw error;
+  }
+};
+
+export const dataLoaders = {
+  loadUserProfile,
+  loadProjects,
+  loadStats,
+  loadPaymentHistory
+};
+
+export default {
+  authAPI,
+  projectsAPI,
+  elementsAPI,
+  paymentsAPI,
+  statsAPI,
+  dataLoaders,
+  storage
+}
