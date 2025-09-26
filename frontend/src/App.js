@@ -11,7 +11,7 @@ import {
 } from './utils/appUtils';
 import { authAPI, projectsAPI } from './api/config.js';
 import LoginScreen from './components/LoginScreen';
-import DashboardScreen from './components/DashBoardScreen';
+import DashboardScreen from './components/DashboardScreen';
 import PlansScreen from './components/PlansScreen';
 import EditorScreen from './components/EditorScreen';
 import PaymentModal from './components/PaymentModal';
