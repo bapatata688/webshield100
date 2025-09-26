@@ -11,7 +11,7 @@ import {
 } from './utils/appUtils';
 import { authAPI, projectsAPI } from './api/config.js';
 import LoginScreen from './components/LoginScreen';
-import DashboardScreen from './components/DashboardScreen';
+import DashboardScreen from './components/DashBoardScreen';
 import PlansScreen from './components/PlansScreen';
 import EditorScreen from './components/EditorScreen';
 import PaymentModal from './components/PaymentModal';
@@ -312,10 +312,10 @@ const WebShield = () => {
             <div
               key={notification.id}
               className={`p-4 rounded-lg shadow-lg flex items-center space-x-2 ${notification.type === 'error'
-                  ? 'bg-red-500'
-                  : notification.type === 'success'
-                    ? 'bg-green-500'
-                    : 'bg-blue-500'
+                ? 'bg-red-500'
+                : notification.type === 'success'
+                  ? 'bg-green-500'
+                  : 'bg-blue-500'
                 } text-white`}
             >
               <Bell className="w-4 h-4" />
