@@ -66,7 +66,7 @@ class TemplateController {
       ];
 
       // Filtrar plantillas según el plan del usuario
-      const availableTemplates = req.user.plan === 'free' 
+      const availableTemplates = req.user.plan === 'free'
         ? templates.slice(0, 2) // Solo 2 plantillas para usuarios gratuitos
         : templates;
 
@@ -144,7 +144,7 @@ class TemplateController {
         'SELECT COUNT(*) FROM proyectos WHERE user_id = $1',
         [req.user.id]
       );
-      
+
       const count = parseInt(projectCount.rows[0].count);
       const userLimits = PLAN_LIMITS[req.user.plan];
 
@@ -275,3 +275,5 @@ class TemplateController {
     }
   }
 }
+module.exports = TemplateController;
+
