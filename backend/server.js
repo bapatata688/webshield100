@@ -27,7 +27,7 @@ app.use(cors({
   origin: [
     'https://webshield100.onrender.com',
     'http://localhost:3000',
-    'https://webshield100-frontend.onrender.com'
+    'https://webshield100-fronted.onrender.com'
   ],
   credentials: true
 }));
