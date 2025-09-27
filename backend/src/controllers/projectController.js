@@ -1,150 +1,36 @@
 const { pool } = require('../config/database');
-const { ERROR_MESSAGES } = require('../config/constants');
+const { ERROR_MESSAGES, PLAN_LIMITS } = require('../config/constants');
 
-class TemplateController {
-  // Obtener plantillas disponibles
-  static async getTemplates(req, res) {
+class ProjectController {
+  // Obtener todos los proyectos del usuario
+  static async getAllProjects(req, res) {
     try {
-      const templates = [
-        {
-          id: 'landing-business',
-          name: 'Landing Page Empresarial',
-          description: 'Página profesional para empresas con formulario de contacto',
-          category: 'business',
-          preview_url: '/templates/landing-business.jpg',
-          difficulty: 'easy',
-          estimated_time: '10 minutos',
-          elements: [
-            { type: 'menu', settings: { links: ['Inicio', 'Servicios', 'Contacto'] } },
-            { type: 'text', settings: { title: 'Bienvenido a nuestra empresa', content: 'Ofrecemos soluciones innovadoras' } },
-            { type: 'image', settings: { src: '/placeholder-hero.jpg', alt: 'Imagen principal' } },
-            { type: 'form', settings: { fields: ['name', 'email', 'message'], title: 'Contáctanos' } }
-          ]
-        },
-        {
-          id: 'portfolio',
-          name: 'Portfolio Creativo',
-          description: 'Muestra tu trabajo con una galería elegante',
-          category: 'creative',
-          preview_url: '/templates/portfolio.jpg',
-          difficulty: 'medium',
-          estimated_time: '15 minutos',
-          elements: [
-            { type: 'text', settings: { title: 'Mi Portfolio', content: 'Descubre mis trabajos más destacados' } },
-            { type: 'gallery', settings: { columns: 3, title: 'Proyectos Destacados' } },
-            { type: 'button', settings: { text: 'Contactar', link: '#contact' } }
-          ]
-        },
-        {
-          id: 'restaurant-menu',
-          name: 'Menú de Restaurante',
-          description: 'Carta digital elegante para restaurantes',
-          category: 'food',
-          preview_url: '/templates/restaurant.jpg',
-          difficulty: 'easy',
-          estimated_time: '12 minutos',
-          elements: [
-            { type: 'text', settings: { title: 'Nuestro Menú', content: 'Platos elaborados con ingredientes frescos' } },
-            { type: 'gallery', settings: { columns: 2, title: 'Especialidades' } },
-            { type: 'form', settings: { fields: ['name', 'phone', 'message'], title: 'Hacer Reserva' } }
-          ]
-        },
-        {
-          id: 'blog-personal',
-          name: 'Blog Personal',
-          description: 'Blog moderno para compartir tus ideas',
-          category: 'blog',
-          preview_url: '/templates/blog.jpg',
-          difficulty: 'medium',
-          estimated_time: '20 minutos',
-          elements: [
-            { type: 'text', settings: { title: 'Mi Blog', content: 'Comparto mis pensamientos y experiencias' } },
-            { type: 'text', settings: { title: 'Último Post', content: 'Aquí va el contenido de tu último artículo...' } },
-            { type: 'button', settings: { text: 'Leer Más', link: '#' } }
-          ]
-        }
-      ];
+      const result = await pool.query(
+        'SELECT id, name, created_at, updated_at FROM proyectos WHERE user_id = $1 ORDER BY updated_at DESC',
+        [req.user.id]
+      );
 
-      // Filtrar plantillas según el plan del usuario
-      const availableTemplates = req.user.plan === 'free'
-        ? templates.slice(0, 2) // Solo 2 plantillas para usuarios gratuitos
-        : templates;
-
-      res.json({
-        templates: availableTemplates,
-        available_for_plan: req.user.plan,
-        total_templates: templates.length,
-        available_count: availableTemplates.length
-      });
-
+      res.json({ projects: result.rows });
     } catch (error) {
-      console.error('Error obteniendo plantillas:', error);
-      res.status(500).json({
+      console.error('Error obteniendo proyectos:', error);
+      res.status(500).json({ 
         error: ERROR_MESSAGES.INTERNAL_ERROR,
-        code: 'INTERNAL_ERROR'
+        code: 'INTERNAL_ERROR' 
       });
     }
   }
 
-  // Crear proyecto desde plantilla
-  static async createFromTemplate(req, res) {
-    const { templateId } = req.params;
-    const { project_name } = req.body;
+  // Crear nuevo proyecto
+  static async createProject(req, res) {
+    const { name } = req.body;
 
     try {
-      // Definir datos de plantillas
-      const templateData = {
-        'landing-business': {
-          name: project_name || 'Mi Landing Page Empresarial',
-          elements: [
-            { type: 'menu', settings: { links: ['Inicio', 'Servicios', 'Contacto'], backgroundColor: '#1f2937' } },
-            { type: 'text', settings: { title: 'Bienvenido a Nuestra Empresa', content: 'Ofrecemos soluciones innovadoras para hacer crecer tu negocio' } },
-            { type: 'image', settings: { src: '', alt: 'Imagen principal' } },
-            { type: 'form', settings: { title: 'Contáctanos', fields: ['name', 'email', 'phone', 'message'] } }
-          ]
-        },
-        'portfolio': {
-          name: project_name || 'Mi Portfolio Creativo',
-          elements: [
-            { type: 'text', settings: { title: 'Mi Portfolio', content: 'Descubre mis trabajos más destacados' } },
-            { type: 'gallery', settings: { columns: 3, title: 'Proyectos Destacados' } },
-            { type: 'text', settings: { title: 'Sobre Mí', content: 'Soy un profesional creativo con experiencia en...' } },
-            { type: 'button', settings: { text: 'Contactar', link: '#contact' } }
-          ]
-        },
-        'restaurant-menu': {
-          name: project_name || 'Menú de Mi Restaurante',
-          elements: [
-            { type: 'text', settings: { title: 'Nuestro Menú', content: 'Platos elaborados con ingredientes frescos y locales' } },
-            { type: 'gallery', settings: { columns: 2, title: 'Especialidades de la Casa' } },
-            { type: 'form', settings: { title: 'Hacer Reserva', fields: ['name', 'phone', 'message'] } }
-          ]
-        },
-        'blog-personal': {
-          name: project_name || 'Mi Blog Personal',
-          elements: [
-            { type: 'text', settings: { title: 'Mi Blog', content: 'Bienvenido a mi espacio personal donde comparto ideas' } },
-            { type: 'text', settings: { title: 'Último Artículo', content: 'Aquí puedes escribir el contenido de tu último post...' } },
-            { type: 'button', settings: { text: 'Leer Artículos Anteriores', link: '#' } }
-          ]
-        }
-      };
-
-      if (!templateData[templateId]) {
-        return res.status(404).json({
-          error: 'Plantilla no encontrada',
-          code: 'TEMPLATE_NOT_FOUND',
-          available_templates: Object.keys(templateData)
-        });
-      }
-
       // Verificar límites por plan
-      const { PLAN_LIMITS } = require('../config/constants');
       const projectCount = await pool.query(
         'SELECT COUNT(*) FROM proyectos WHERE user_id = $1',
         [req.user.id]
       );
-
+      
       const count = parseInt(projectCount.rows[0].count);
       const userLimits = PLAN_LIMITS[req.user.plan];
 
@@ -152,128 +38,354 @@ class TemplateController {
         return res.status(403).json({
           error: `Límite de proyectos alcanzado para plan ${req.user.plan}`,
           limit: userLimits.projects,
-          current: count
+          current: count,
+          upgrade_url: '/api/plans'
         });
       }
 
-      await pool.query('BEGIN');
-
-      const template = templateData[templateId];
-
       // Crear proyecto
-      const project = await pool.query(
+      const result = await pool.query(
         'INSERT INTO proyectos (name, user_id) VALUES ($1, $2) RETURNING *',
-        [template.name, req.user.id]
+        [name.trim(), req.user.id]
       );
 
-      // Crear elementos de la plantilla
-      for (let i = 0; i < template.elements.length; i++) {
-        const element = template.elements[i];
-        await pool.query(
-          'INSERT INTO elementos (project_id, type, settings, order_position) VALUES ($1, $2, $3, $4)',
-          [project.rows[0].id, element.type, JSON.stringify(element.settings), i + 1]
-        );
-      }
-
-      await pool.query('COMMIT');
-
-      console.log(`Proyecto creado desde plantilla ${templateId}: ${template.name} por ${req.user.email}`);
+      console.log(`Nuevo proyecto creado: ${name} por ${req.user.email}`);
 
       res.status(201).json({
-        message: 'Proyecto creado desde plantilla exitosamente',
-        project: project.rows[0],
-        template_used: templateId,
-        elements_created: template.elements.length
+        message: 'Proyecto creado exitosamente',
+        project: result.rows[0]
       });
 
     } catch (error) {
-      await pool.query('ROLLBACK');
-      console.error('Error creando desde plantilla:', error);
-      res.status(500).json({
+      console.error('Error creando proyecto:', error);
+      res.status(500).json({ 
         error: ERROR_MESSAGES.INTERNAL_ERROR,
-        code: 'INTERNAL_ERROR'
+        code: 'INTERNAL_ERROR' 
       });
     }
   }
 
-  // Estadísticas avanzadas (solo Premium)
-  static async getAdvancedStats(req, res) {
+  // Obtener proyecto específico con elementos
+  static async getProject(req, res) {
+    const { id } = req.params;
+
     try {
-      const [overviewResult, elementsResult, activityResult, performanceResult] = await Promise.all([
-        // Estadísticas generales
-        pool.query(`
-          SELECT 
-            COUNT(DISTINCT p.id) as total_projects,
-            COUNT(e.id) as total_elements,
-            COUNT(CASE WHEN pg.status = 'completed' THEN 1 END) as successful_payments,
-            SUM(CASE WHEN pg.status = 'completed' THEN pg.amount ELSE 0 END) as total_spent,
-            MAX(p.updated_at) as last_project_update
-          FROM proyectos p
-          LEFT JOIN elementos e ON p.id = e.project_id
-          LEFT JOIN pagos pg ON p.user_id = pg.user_id
-          WHERE p.user_id = $1
-        `, [req.user.id]),
+      const projectResult = await pool.query(
+        'SELECT * FROM proyectos WHERE id = $1 AND user_id = $2',
+        [id, req.user.id]
+      );
 
-        // Uso de elementos por tipo
-        pool.query(`
-          SELECT e.type, COUNT(*) as count, 
-                 AVG(LENGTH(e.settings::text)) as avg_complexity
-          FROM elementos e
-          JOIN proyectos p ON e.project_id = p.id
-          WHERE p.user_id = $1
-          GROUP BY e.type
-          ORDER BY count DESC
-        `, [req.user.id]),
+      if (projectResult.rows.length === 0) {
+        return res.status(404).json({ 
+          error: ERROR_MESSAGES.PROJECT_NOT_FOUND,
+          code: 'PROJECT_NOT_FOUND' 
+        });
+      }
 
-        // Actividad por mes
-        pool.query(`
-          SELECT 
-            DATE_TRUNC('month', created_at) as month,
-            COUNT(*) as projects_created
-          FROM proyectos 
-          WHERE user_id = $1 
-          AND created_at >= CURRENT_DATE - INTERVAL '6 months'
-          GROUP BY DATE_TRUNC('month', created_at)
-          ORDER BY month DESC
-        `, [req.user.id]),
+      // Obtener elementos del proyecto
+      const elementsResult = await pool.query(
+        'SELECT * FROM elementos WHERE project_id = $1 ORDER BY order_position ASC',
+        [id]
+      );
 
-        // Métricas de rendimiento
-        pool.query(`
-          SELECT 
-            AVG(element_count) as avg_elements_per_project,
-            MAX(element_count) as max_elements_in_project,
-            COUNT(CASE WHEN element_count > 10 THEN 1 END) as complex_projects
-          FROM (
-            SELECT p.id, COUNT(e.id) as element_count
-            FROM proyectos p
-            LEFT JOIN elementos e ON p.id = e.project_id
-            WHERE p.user_id = $1
-            GROUP BY p.id
-          ) project_stats
-        `, [req.user.id])
-      ]);
+      const project = projectResult.rows[0];
+      project.elements = elementsResult.rows;
+
+      res.json({ project });
+
+    } catch (error) {
+      console.error('Error obteniendo proyecto:', error);
+      res.status(500).json({ 
+        error: ERROR_MESSAGES.INTERNAL_ERROR,
+        code: 'INTERNAL_ERROR' 
+      });
+    }
+  }
+
+  // Actualizar proyecto
+  static async updateProject(req, res) {
+    const { id } = req.params;
+    const { name } = req.body;
+
+    try {
+      const result = await pool.query(
+        'UPDATE proyectos SET name = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2 AND user_id = $3 RETURNING *',
+        [name.trim(), id, req.user.id]
+      );
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({ 
+          error: ERROR_MESSAGES.PROJECT_NOT_FOUND,
+          code: 'PROJECT_NOT_FOUND' 
+        });
+      }
 
       res.json({
-        overview: {
-          ...overviewResult.rows[0],
-          total_spent: parseFloat(overviewResult.rows[0].total_spent) || 0
-        },
-        element_usage: elementsResult.rows,
-        activity_by_month: activityResult.rows,
-        performance: performanceResult.rows[0],
-        user_plan: req.user.plan,
-        generated_at: new Date().toISOString(),
-        next_update_in: '24h'
+        message: 'Proyecto actualizado exitosamente',
+        project: result.rows[0]
       });
 
     } catch (error) {
-      console.error('Error obteniendo estadísticas:', error);
-      res.status(500).json({
+      console.error('Error actualizando proyecto:', error);
+      res.status(500).json({ 
         error: ERROR_MESSAGES.INTERNAL_ERROR,
-        code: 'INTERNAL_ERROR'
+        code: 'INTERNAL_ERROR' 
+      });
+    }
+  }
+
+  // Eliminar proyecto
+  static async deleteProject(req, res) {
+    const { id } = req.params;
+
+    try {
+      const result = await pool.query(
+        'DELETE FROM proyectos WHERE id = $1 AND user_id = $2 RETURNING id, name',
+        [id, req.user.id]
+      );
+
+      if (result.rows.length === 0) {
+        return res.status(404).json({ 
+          error: ERROR_MESSAGES.PROJECT_NOT_FOUND,
+          code: 'PROJECT_NOT_FOUND' 
+        });
+      }
+
+      console.log(`Proyecto eliminado: ${result.rows[0].name} por ${req.user.email}`);
+
+      res.json({ 
+        message: 'Proyecto eliminado exitosamente',
+        deleted_project: result.rows[0]
+      });
+
+    } catch (error) {
+      console.error('Error eliminando proyecto:', error);
+      res.status(500).json({ 
+        error: ERROR_MESSAGES.INTERNAL_ERROR,
+        code: 'INTERNAL_ERROR' 
+      });
+    }
+  }
+
+  // Buscar proyectos
+  static async searchProjects(req, res) {
+    try {
+      const { q, type } = req.query;
+
+      const searchQuery = `%${q.trim()}%`;
+      let query = `
+        SELECT p.id, p.name, p.created_at, p.updated_at,
+               COUNT(e.id) as element_count
+        FROM proyectos p 
+        LEFT JOIN elementos e ON p.id = e.project_id 
+        WHERE p.user_id = $1 AND p.name ILIKE $2
+      `;
+
+      const params = [req.user.id, searchQuery];
+
+      if (type) {
+        query += ` AND e.type = $3`;
+        params.push(type);
+      }
+
+      query += ` GROUP BY p.id, p.name, p.created_at, p.updated_at ORDER BY p.updated_at DESC LIMIT 20`;
+
+      const result = await pool.query(query, params);
+
+      res.json({
+        projects: result.rows,
+        search_query: q,
+        results_count: result.rows.length
+      });
+
+    } catch (error) {
+      console.error('Error en búsqueda:', error);
+      res.status(500).json({ 
+        error: ERROR_MESSAGES.INTERNAL_ERROR,
+        code: 'INTERNAL_ERROR' 
+      });
+    }
+  }
+
+  // Duplicar proyecto
+  static async duplicateProject(req, res) {
+    const { id } = req.params;
+
+    try {
+      await pool.query('BEGIN');
+
+      // Obtener proyecto original
+      const originalProject = await pool.query(
+        'SELECT * FROM proyectos WHERE id = $1 AND user_id = $2',
+        [id, req.user.id]
+      );
+
+      if (originalProject.rows.length === 0) {
+        await pool.query('ROLLBACK');
+        return res.status(404).json({ 
+          error: ERROR_MESSAGES.PROJECT_NOT_FOUND,
+          code: 'PROJECT_NOT_FOUND' 
+        });
+      }
+
+      // Verificar límites antes de duplicar
+      const projectCount = await pool.query(
+        'SELECT COUNT(*) FROM proyectos WHERE user_id = $1',
+        [req.user.id]
+      );
+      
+      const count = parseInt(projectCount.rows[0].count);
+      const userLimits = PLAN_LIMITS[req.user.plan];
+
+      if (count >= userLimits.projects) {
+        await pool.query('ROLLBACK');
+        return res.status(403).json({
+          error: `Límite de proyectos alcanzado para plan ${req.user.plan}`,
+          limit: userLimits.projects,
+          current: count
+        });
+      }
+
+      // Crear proyecto duplicado
+      const newName = `${originalProject.rows[0].name} (Copia)`;
+      const newProject = await pool.query(
+        'INSERT INTO proyectos (name, user_id) VALUES ($1, $2) RETURNING *',
+        [newName, req.user.id]
+      );
+
+      // Duplicar elementos
+      await pool.query(`
+        INSERT INTO elementos (project_id, type, settings, order_position)
+        SELECT $1, type, settings, order_position 
+        FROM elementos 
+        WHERE project_id = $2
+        ORDER BY order_position
+      `, [newProject.rows[0].id, id]);
+
+      await pool.query('COMMIT');
+
+      console.log(`Proyecto duplicado: ${newName} por ${req.user.email}`);
+
+      res.status(201).json({
+        message: 'Proyecto duplicado exitosamente',
+        project: newProject.rows[0]
+      });
+
+    } catch (error) {
+      await pool.query('ROLLBACK');
+      console.error('Error duplicando proyecto:', error);
+      res.status(500).json({ 
+        error: ERROR_MESSAGES.INTERNAL_ERROR,
+        code: 'INTERNAL_ERROR' 
+      });
+    }
+  }
+
+  // Guardar proyecto completo (solo Pro/Premium)
+  static async saveProject(req, res) {
+    const { id } = req.params;
+    const { elements } = req.body;
+
+    try {
+      await pool.query('BEGIN');
+
+      // Verificar que el proyecto existe y pertenece al usuario
+      const projectCheck = await pool.query(
+        'SELECT id FROM proyectos WHERE id = $1 AND user_id = $2',
+        [id, req.user.id]
+      );
+
+      if (projectCheck.rows.length === 0) {
+        await pool.query('ROLLBACK');
+        return res.status(404).json({ 
+          error: ERROR_MESSAGES.PROJECT_NOT_FOUND,
+          code: 'PROJECT_NOT_FOUND' 
+        });
+      }
+
+      // Eliminar elementos existentes
+      await pool.query('DELETE FROM elementos WHERE project_id = $1', [id]);
+
+      // Insertar nuevos elementos
+      if (elements && elements.length > 0) {
+        for (let i = 0; i < elements.length; i++) {
+          const element = elements[i];
+          await pool.query(
+            'INSERT INTO elementos (project_id, type, settings, order_position) VALUES ($1, $2, $3, $4)',
+            [id, element.type, JSON.stringify(element.settings || {}), i + 1]
+          );
+        }
+      }
+
+      // Actualizar timestamp del proyecto
+      await pool.query(
+        'UPDATE proyectos SET updated_at = CURRENT_TIMESTAMP WHERE id = $1',
+        [id]
+      );
+
+      await pool.query('COMMIT');
+
+      console.log(`Proyecto guardado: ID ${id} por ${req.user.email}`);
+
+      res.json({ 
+        message: 'Proyecto guardado exitosamente en la nube',
+        elements_count: elements ? elements.length : 0
+      });
+
+    } catch (error) {
+      await pool.query('ROLLBACK');
+      console.error('Error guardando proyecto:', error);
+      res.status(500).json({ 
+        error: ERROR_MESSAGES.INTERNAL_ERROR,
+        code: 'INTERNAL_ERROR' 
+      });
+    }
+  }
+
+  // Exportar proyecto (solo Pro/Premium)
+  static async exportProject(req, res) {
+    const { id } = req.params;
+
+    try {
+      const projectResult = await pool.query(
+        'SELECT name FROM proyectos WHERE id = $1 AND user_id = $2',
+        [id, req.user.id]
+      );
+
+      if (projectResult.rows.length === 0) {
+        return res.status(404).json({ 
+          error: ERROR_MESSAGES.PROJECT_NOT_FOUND,
+          code: 'PROJECT_NOT_FOUND' 
+        });
+      }
+
+      const elementsResult = await pool.query(
+        'SELECT type, settings FROM elementos WHERE project_id = $1 ORDER BY order_position ASC',
+        [id]
+      );
+
+      const project = projectResult.rows[0];
+      const elements = elementsResult.rows;
+      
+      // Importar el generador de HTML
+      const { generateHTML } = require('../services/htmlGenerator');
+      const html = generateHTML(project.name, elements);
+
+      res.json({
+        project: project.name,
+        html: html,
+        elements_count: elements.length,
+        export_date: new Date().toISOString()
+      });
+
+    } catch (error) {
+      console.error('Error exportando proyecto:', error);
+      res.status(500).json({ 
+        error: ERROR_MESSAGES.INTERNAL_ERROR,
+        code: 'INTERNAL_ERROR' 
       });
     }
   }
 }
 
-module.exports = TemplateController;
+module.exports = ProjectController;
