@@ -1,5 +1,4 @@
 
-// components/PlansScreen.js
 import React from 'react';
 import { ChevronLeft, CheckCircle } from 'lucide-react';
 import { PLANS } from '../constants/appConstants';

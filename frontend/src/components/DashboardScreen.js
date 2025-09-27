@@ -1,8 +1,7 @@
-// components/DashboardScreen.js
 import React, { useState, useEffect } from 'react';
-import { 
-  Shield, LogOut, Home, User, Loader2, FolderPlus, Trash2, 
-  FileCode, Search 
+import {
+  Shield, LogOut, Home, User, Loader2, FolderPlus, Trash2,
+  FileCode, Search
 } from 'lucide-react';
 import { projectsAPI, loadPaymentHistory } from '../api/config.js';
 
@@ -167,11 +166,10 @@ const DashboardScreen = ({ user, projects, setProjects, onProjectSelect, onLogou
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">Plan Actual</label>
                 <div className="flex items-center space-x-3">
-                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${
-                    user?.plan === 'free' ? 'bg-gray-100 text-gray-700' :
-                    user?.plan === 'pro' ? 'bg-blue-100 text-blue-700' :
-                    'bg-purple-100 text-purple-700'
-                  }`}>
+                  <span className={`px-3 py-1 rounded-full text-sm font-medium ${user?.plan === 'free' ? 'bg-gray-100 text-gray-700' :
+                      user?.plan === 'pro' ? 'bg-blue-100 text-blue-700' :
+                        'bg-purple-100 text-purple-700'
+                    }`}>
                     {user?.plan?.toUpperCase()}
                   </span>
                 </div>
@@ -199,10 +197,9 @@ const DashboardScreen = ({ user, projects, setProjects, onProjectSelect, onLogou
                     <div key={payment.id} className="border-b pb-3">
                       <div className="flex justify-between items-center">
                         <span className="font-medium">${payment.amount}</span>
-                        <span className={`px-2 py-1 text-xs rounded-full ${
-                          payment.status === 'completed' ? 'bg-green-100 text-green-800' :
-                          'bg-yellow-100 text-yellow-800'
-                        }`}>
+                        <span className={`px-2 py-1 text-xs rounded-full ${payment.status === 'completed' ? 'bg-green-100 text-green-800' :
+                            'bg-yellow-100 text-yellow-800'
+                          }`}>
                           {payment.status}
                         </span>
                       </div>
@@ -233,11 +230,10 @@ const DashboardScreen = ({ user, projects, setProjects, onProjectSelect, onLogou
             <div className="flex items-center space-x-4">
               <div className="flex items-center space-x-2">
                 <span className="text-sm text-gray-600">Hola, {user?.email}</span>
-                <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                  user?.plan === 'free' ? 'bg-gray-100 text-gray-700' :
-                  user?.plan === 'pro' ? 'bg-blue-100 text-blue-700' :
-                  'bg-purple-100 text-purple-700'
-                }`}>
+                <span className={`px-2 py-1 rounded-full text-xs font-medium ${user?.plan === 'free' ? 'bg-gray-100 text-gray-700' :
+                    user?.plan === 'pro' ? 'bg-blue-100 text-blue-700' :
+                      'bg-purple-100 text-purple-700'
+                  }`}>
                   {user?.plan?.toUpperCase()}
                 </span>
                 <button
@@ -256,9 +252,8 @@ const DashboardScreen = ({ user, projects, setProjects, onProjectSelect, onLogou
         <div className="flex space-x-1 mb-8 bg-gray-100 p-1 rounded-lg">
           <button
             onClick={() => setActiveTab('projects')}
-            className={`px-4 py-2 rounded-md font-medium transition-colors ${
-              activeTab === 'projects' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-600 hover:text-gray-900'
-            }`}
+            className={`px-4 py-2 rounded-md font-medium transition-colors ${activeTab === 'projects' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-600 hover:text-gray-900'
+              }`}
           >
             <Home className="w-4 h-4 inline mr-2" />
             Proyectos
@@ -266,9 +261,8 @@ const DashboardScreen = ({ user, projects, setProjects, onProjectSelect, onLogou
 
           <button
             onClick={() => setActiveTab('account')}
-            className={`px-4 py-2 rounded-md font-medium transition-colors ${
-              activeTab === 'account' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-600 hover:text-gray-900'
-            }`}
+            className={`px-4 py-2 rounded-md font-medium transition-colors ${activeTab === 'account' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-600 hover:text-gray-900'
+              }`}
           >
             <User className="w-4 h-4 inline mr-2" />
             Cuenta

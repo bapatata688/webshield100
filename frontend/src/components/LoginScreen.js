@@ -1,4 +1,3 @@
-// components/LoginScreen.js
 import React, { useState } from 'react';
 import { Shield, LogIn, UserPlus, Loader2 } from 'lucide-react';
 import { authAPI } from '../api/config.js';

@@ -1,4 +1,3 @@
-// utils/appUtils.js
 import { ELEMENT_DEFAULTS, DEFAULT_ELEMENT_SETTINGS } from '../constants/appConstants.js';
 
 export const getDefaultContent = (type) => {

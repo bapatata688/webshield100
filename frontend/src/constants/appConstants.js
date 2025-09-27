@@ -1,4 +1,3 @@
-// constants/appConstants.js
 import { Type, Image, MousePointer, Menu, FileText, Camera } from 'lucide-react';
 
 export const ELEMENTS = {

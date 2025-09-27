@@ -1,4 +1,3 @@
-// components/EditorScreen.js
 import React from 'react';
 import {
   Shield, ChevronLeft, Undo2, Redo2, Save, Download, Eye,

@@ -1,6 +1,5 @@
 
 
-// components/CanvasElement.js
 import React from 'react';
 import { Image, Camera, Copy, Trash2 } from 'lucide-react';
 import { getSizeClasses } from '../utils/appUtils';

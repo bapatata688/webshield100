@@ -18,19 +18,16 @@ const templateRoutes = require('./src/routes/templateRoutes');
 
 const app = express();
 
-// ==================== CONFIGURACIÓN BÁSICA ====================
 app.set('trust proxy', 1);
 
-// ==================== MIDDLEWARES GLOBALES ====================
-// Aplicar middlewares de seguridad
 securityMiddleware(app);
 
 // CORS
 app.use(cors({
   origin: [
-    'https://webshield100.onrender.com', 
-    'http://localhost:3000', 
-    'https://webshield100-fronted.onrender.com'
+    'https://webshield100.onrender.com',
+    'http://localhost:3000',
+    'https://webshield100-frontend.onrender.com'
   ],
   credentials: true
 }));
@@ -38,7 +35,6 @@ app.use(cors({
 // Body parser
 app.use(express.json({ limit: '10mb' }));
 
-// ==================== ENDPOINT DE SALUD ====================
 app.get('/api/health', async (req, res) => {
   try {
     const dbStart = Date.now();
@@ -89,30 +85,30 @@ app.use('*', (req, res) => {
 async function checkDatabaseConnection() {
   try {
     await pool.query('SELECT NOW()');
-    console.log('✅ Conexión a PostgreSQL establecida');
+    console.log(' Conexión a PostgreSQL establecida');
     await createTablesIfNotExist();
   } catch (error) {
-    console.error('❌ Error conectando a PostgreSQL:', error);
+    console.error(' Error conectando a PostgreSQL:', error);
     process.exit(1);
   }
 }
 
 app.listen(PORT, async () => {
   await checkDatabaseConnection();
-  console.log(`🛡️ WebShield Backend ejecutándose en puerto ${PORT}`);
-  console.log(`🌍 Ambiente: ${process.env.NODE_ENV || 'development'}`);
-  console.log(`🔒 Seguridad: JWT activo`);
+  console.log(` WebShield Backend ejecutándose en puerto ${PORT}`);
+  console.log(` Ambiente: ${process.env.NODE_ENV || 'development'}`);
+  console.log(` Seguridad: JWT activo`);
 });
 
 // Graceful shutdown
 process.on('SIGTERM', async () => {
-  console.log('🔄 Cerrando servidor...');
+  console.log('! Cerrando servidor...');
   await pool.end();
   process.exit(0);
 });
 
 process.on('SIGINT', async () => {
-  console.log('🔄 Cerrando servidor...');
+  console.log('! Cerrando servidor...');
   await pool.end();
   process.exit(0);
 });

@@ -1,4 +1,3 @@
-// App.js - Versión final modular
 import React, { useState, useEffect } from 'react';
 import { Bell } from 'lucide-react';
 import { SCREEN_TYPES, APP_CONFIG } from './constants/appConstants';
