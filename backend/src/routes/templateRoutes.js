@@ -16,9 +16,7 @@ router.get('/',
 router.post('/:templateId/create', 
   authenticateToken,
   requirePlan(['pro', 'premium']),
-  validateParamsSchema(validateParams.templateId || {
-    templateId: require('joi').string().required()
-  }),
+  validateParamsSchema(validateParams.templateId),
   validateSchema(schemas.template),
   TemplateController.createFromTemplate
 );
@@ -30,4 +28,4 @@ router.get('/stats',
   TemplateController.getAdvancedStats
 );
 
-module.exports = { TemplateController, templateRoutes: router };
+module.exports = router;
