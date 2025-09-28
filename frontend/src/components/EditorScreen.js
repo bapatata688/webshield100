@@ -3,36 +3,32 @@ import {
   Shield, ChevronLeft, Undo2, Redo2, Save, Download, Eye,
   Loader2, Type, AlertTriangle, Lock, Plus, Settings, CheckCircle, Crown
 } from 'lucide-react';
-import { ELEMENTS, SCREEN_TYPES } from '../constants/appConstants';
+import { ELEMENTS } from '../constants/appConstants';
 import { getCanvasPermissions } from '../utils/appUtils';
-import { useAppContext } from '../context/AppContext';
 import CanvasElement from './CanvasElement';
-
-const EditorScreen = ({ getDefaultContent }) => {
-  // Obtener todo lo necesario del context
-  const {
-    user,
-    currentProject,
-    draggedElements,
-    selectedElement,
-    history,
-    historyIndex,
-    isPreview,
-    isSaving,
-    loading,
-    setCurrentScreen,
-    setSelectedElement,
-    setIsPreview,
-    addElement,
-    updateSelectedElement,
-    removeElement,
-    duplicateElement,
-    undo,
-    redo,
-    handleSave,
-    handleExport
-  } = useAppContext();
-
+const EditorScreen = ({
+  user,
+  currentProject,
+  draggedElements,
+  selectedElement,
+  history,
+  historyIndex,
+  isPreview,
+  isSaving,
+  loading,
+  onAddElement,
+  onSelectElement,
+  onDuplicateElement,
+  onRemoveElement,
+  onUpdateElement,
+  onUndo,
+  onRedo,
+  onSave,
+  onExport,
+  onPreview,
+  onBackToDashboard,
+  getDefaultContent
+}) => {
   const availableElements = user?.plan === 'free' ? ELEMENTS.free : ELEMENTS.pro;
   const permissions = getCanvasPermissions(user?.plan);
 
@@ -49,7 +45,7 @@ const EditorScreen = ({ getDefaultContent }) => {
               </div>
             </div>
             <button
-              onClick={() => setIsPreview(false)}
+              onClick={() => onPreview(false)}
               className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 font-medium transition-colors"
             >
               Volver al Editor
@@ -88,7 +84,7 @@ const EditorScreen = ({ getDefaultContent }) => {
         <div className="flex items-center justify-between max-w-7xl mx-auto">
           <div className="flex items-center space-x-4">
             <button
-              onClick={() => setCurrentScreen(SCREEN_TYPES.DASHBOARD)}
+              onClick={onBackToDashboard}
               className="text-gray-400 hover:text-gray-600"
             >
               <ChevronLeft className="w-6 h-6" />
@@ -107,33 +103,33 @@ const EditorScreen = ({ getDefaultContent }) => {
 
           <div className="flex items-center space-x-3">
             <button
-              onClick={undo}
+              onClick={onUndo}
               disabled={historyIndex <= 0}
               className={`flex items-center px-3 py-2 rounded-lg font-medium transition-colors ${historyIndex <= 0
-                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                  : 'bg-gray-300 text-gray-700 hover:bg-gray-400'
+                ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                : 'bg-gray-300 text-gray-700 hover:bg-gray-400'
                 }`}
               title="Deshacer"
             >
               <Undo2 className="w-4 h-4" />
             </button>
             <button
-              onClick={redo}
+              onClick={onRedo}
               disabled={historyIndex >= history.length - 1}
               className={`flex items-center px-3 py-2 rounded-lg font-medium transition-colors ${historyIndex >= history.length - 1
-                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                  : 'bg-gray-300 text-gray-700 hover:bg-gray-400'
+                ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                : 'bg-gray-300 text-gray-700 hover:bg-gray-400'
                 }`}
               title="Rehacer"
             >
               <Redo2 className="w-4 h-4" />
             </button>
             <button
-              onClick={handleSave}
+              onClick={onSave}
               disabled={!permissions.canSave || isSaving}
               className={`flex items-center px-4 py-2 rounded-lg font-medium transition-colors ${permissions.canSave && !isSaving
-                  ? 'bg-green-600 text-white hover:bg-green-700 shadow-sm'
-                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                ? 'bg-green-600 text-white hover:bg-green-700 shadow-sm'
+                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                 }`}
             >
               {isSaving ? (
@@ -144,18 +140,18 @@ const EditorScreen = ({ getDefaultContent }) => {
               {isSaving ? 'Guardando...' : 'Guardar'}
             </button>
             <button
-              onClick={() => setIsPreview(true)}
+              onClick={() => onPreview(true)}
               className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center font-medium shadow-sm transition-colors"
             >
               <Eye className="w-4 h-4 mr-2" />
               Previsualizar
             </button>
             <button
-              onClick={handleExport}
+              onClick={onExport}
               disabled={!permissions.canExport || loading}
               className={`flex items-center px-4 py-2 rounded-lg font-medium transition-colors ${permissions.canExport && !loading
-                  ? 'bg-purple-600 text-white hover:bg-purple-700 shadow-sm'
-                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                ? 'bg-purple-600 text-white hover:bg-purple-700 shadow-sm'
+                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                 }`}
             >
               {loading ? (
@@ -191,7 +187,7 @@ const EditorScreen = ({ getDefaultContent }) => {
               {availableElements.map((element) => (
                 <div
                   key={element.id}
-                  onClick={() => addElement(element)}
+                  onClick={() => onAddElement(element)}
                   className="flex items-center p-3 mb-2 bg-white rounded-lg border-2 border-gray-200 cursor-pointer hover:bg-gray-50 hover:border-blue-300 transition-colors group"
                 >
                   <element.icon className="w-5 h-5 text-gray-600 group-hover:text-blue-600 mr-3" />
@@ -243,9 +239,9 @@ const EditorScreen = ({ getDefaultContent }) => {
                     element={element}
                     index={index}
                     selectedElement={selectedElement}
-                    onSelect={setSelectedElement}
-                    onDuplicate={duplicateElement}
-                    onRemove={removeElement}
+                    onSelect={onSelectElement}
+                    onDuplicate={onDuplicateElement}
+                    onRemove={onRemoveElement}
                     getDefaultContent={getDefaultContent}
                   />
                 ))}
@@ -271,7 +267,7 @@ const EditorScreen = ({ getDefaultContent }) => {
                   <textarea
                     rows="3"
                     value={draggedElements[selectedElement]?.settings?.content || ''}
-                    onChange={(e) => updateSelectedElement('content', e.target.value)}
+                    onChange={(e) => onUpdateElement('content', e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     placeholder="Escribe el contenido del elemento..."
                   />
@@ -283,7 +279,7 @@ const EditorScreen = ({ getDefaultContent }) => {
                     <input
                       type="url"
                       value={draggedElements[selectedElement]?.settings?.imageUrl || ''}
-                      onChange={(e) => updateSelectedElement('imageUrl', e.target.value)}
+                      onChange={(e) => onUpdateElement('imageUrl', e.target.value)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500"
                       placeholder="https://ejemplo.com/imagen.jpg"
                     />
@@ -295,7 +291,7 @@ const EditorScreen = ({ getDefaultContent }) => {
                   <input
                     type="color"
                     value={draggedElements[selectedElement]?.settings?.color || '#3B82F6'}
-                    onChange={(e) => updateSelectedElement('color', e.target.value)}
+                    onChange={(e) => onUpdateElement('color', e.target.value)}
                     className="w-full h-12 border border-gray-300 rounded-md cursor-pointer"
                   />
                 </div>
@@ -304,7 +300,7 @@ const EditorScreen = ({ getDefaultContent }) => {
                   <label className="block text-sm font-medium text-gray-700 mb-2">Tamaño</label>
                   <select
                     value={draggedElements[selectedElement]?.settings?.size || 'medium'}
-                    onChange={(e) => updateSelectedElement('size', e.target.value)}
+                    onChange={(e) => onUpdateElement('size', e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="small">Pequeño</option>
@@ -318,7 +314,7 @@ const EditorScreen = ({ getDefaultContent }) => {
                   <input
                     type="url"
                     value={draggedElements[selectedElement]?.settings?.link || ''}
-                    onChange={(e) => updateSelectedElement('link', e.target.value)}
+                    onChange={(e) => onUpdateElement('link', e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500"
                     placeholder="https://ejemplo.com"
                   />
@@ -338,7 +334,7 @@ const EditorScreen = ({ getDefaultContent }) => {
                   <h4 className="font-medium text-gray-800 mb-2">¿Necesitas más poder?</h4>
                   <p className="text-sm text-gray-600 mb-4">Desbloquea todos los elementos y funciones profesionales</p>
                   <button
-                    onClick={() => setCurrentScreen(SCREEN_TYPES.PLANS)}
+                    onClick={() => setCurrentScreen('plans')}
                     className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-4 rounded-lg hover:from-blue-700 hover:to-purple-700 text-sm font-medium transition-all shadow-sm"
                   >
                     Actualizar Plan
