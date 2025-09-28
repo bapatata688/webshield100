@@ -8,6 +8,7 @@ import {
   validateUserPlan,
   getDefaultContent
 } from './utils/appUtils';
+import { AppProvider } from './context/AppContext';
 import { authAPI, projectsAPI } from './api/config.js';
 import LoginScreen from './components/LoginScreen';
 import DashboardScreen from './components/DashboardScreen';
@@ -30,8 +31,6 @@ const WebShield = () => {
   const [history, setHistory] = useState([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [isSaving, setIsSaving] = useState(false);
-
-  // Estados para pagos
   const [showPayment, setShowPayment] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState(null);
 
@@ -102,6 +101,7 @@ const WebShield = () => {
   };
 
   const handlePlanSelect = (plan) => {
+    console.log("Plan selected:", plan);
     setSelectedPlan(plan);
     setShowPayment(true);
   };
@@ -228,62 +228,74 @@ const WebShield = () => {
     }
   };
 
-  // Renderizado condicional
+  // Crear el objeto de valor para el context
+  const contextValue = {
+    // Estados
+    user,
+    currentScreen,
+    projects,
+    currentProject,
+    draggedElements,
+    selectedElement,
+    isPreview,
+    loading,
+    notifications,
+    searchQuery,
+    history,
+    historyIndex,
+    isSaving,
+    showPayment,
+    selectedPlan,
+
+    // Setters
+    setUser,
+    setCurrentScreen,
+    setProjects,
+    setCurrentProject,
+    setDraggedElements,
+    setSelectedElement,
+    setIsPreview,
+    setLoading,
+    setNotifications,
+    setSearchQuery,
+    setHistory,
+    setHistoryIndex,
+    setIsSaving,
+    setShowPayment,
+    setSelectedPlan,
+
+    // Funciones de negocio
+    handleLogin,
+    handleLogout,
+    handleProjectSelect,
+    handlePlanSelect,
+    handlePaymentSuccess,
+    addElement,
+    updateSelectedElement,
+    removeElement,
+    duplicateElement,
+    undo,
+    redo,
+    handleSave,
+    handleExport,
+    loadProjects,
+    loadUserProfile
+  };
+
+  // Renderizado condicional simplificado (ahora los componentes usan context)
   const renderCurrentScreen = () => {
     switch (currentScreen) {
       case SCREEN_TYPES.LOGIN:
-        return <LoginScreen onLogin={handleLogin} />;
+        return <LoginScreen />;
 
       case SCREEN_TYPES.DASHBOARD:
-        return (
-          <DashboardScreen
-            user={user}
-            projects={projects}
-            setProjects={setProjects}
-            onProjectSelect={handleProjectSelect}
-            onLogout={handleLogout}
-            searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
-            loading={loading}
-            setLoading={setLoading}
-          />
-        );
+        return <DashboardScreen />;
 
       case SCREEN_TYPES.PLANS:
-        return (
-          <PlansScreen
-            user={user}
-            onPlanSelect={handlePlanSelect}
-            onBack={() => setCurrentScreen(user ? SCREEN_TYPES.DASHBOARD : SCREEN_TYPES.LOGIN)}
-          />
-        );
+        return <PlansScreen />;
 
       case SCREEN_TYPES.EDITOR:
-        return (
-          <EditorScreen
-            user={user}
-            currentProject={currentProject}
-            draggedElements={draggedElements}
-            selectedElement={selectedElement}
-            history={history}
-            historyIndex={historyIndex}
-            isPreview={isPreview}
-            isSaving={isSaving}
-            loading={loading}
-            onAddElement={addElement}
-            onSelectElement={setSelectedElement}
-            onDuplicateElement={duplicateElement}
-            onRemoveElement={removeElement}
-            onUpdateElement={updateSelectedElement}
-            onUndo={undo}
-            onRedo={redo}
-            onSave={handleSave}
-            onExport={handleExport}
-            onPreview={setIsPreview}
-            onBackToDashboard={() => setCurrentScreen(SCREEN_TYPES.DASHBOARD)}
-            getDefaultContent={getDefaultContent}
-          />
-        );
+        return <EditorScreen getDefaultContent={getDefaultContent} />;
 
       default:
         return <div>Pantalla no encontrada</div>;
@@ -291,39 +303,41 @@ const WebShield = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 font-sans">
-      {renderCurrentScreen()}
+    <AppProvider value={contextValue}>
+      <div className="min-h-screen bg-gray-50 font-sans">
+        {renderCurrentScreen()}
 
-      {/* Modal de pago */}
-      <PaymentModal
-        showPayment={showPayment}
-        selectedPlan={selectedPlan}
-        user={user}
-        setUser={setUser}
-        onClose={() => setShowPayment(false)}
-        onSuccess={handlePaymentSuccess}
-      />
+        {/* Modal de pago */}
+        <PaymentModal
+          showPayment={showPayment}
+          selectedPlan={selectedPlan}
+          user={user}
+          setUser={setUser}
+          onClose={() => setShowPayment(false)}
+          onSuccess={handlePaymentSuccess}
+        />
 
-      {/* Notificaciones globales */}
-      {notifications.length > 0 && (
-        <div className="fixed top-4 right-4 z-50 space-y-2">
-          {notifications.map(notification => (
-            <div
-              key={notification.id}
-              className={`p-4 rounded-lg shadow-lg flex items-center space-x-2 ${notification.type === 'error'
-                ? 'bg-red-500'
-                : notification.type === 'success'
-                  ? 'bg-green-500'
-                  : 'bg-blue-500'
-                } text-white`}
-            >
-              <Bell className="w-4 h-4" />
-              <span>{notification.message}</span>
-            </div>
-          ))}
-        </div>
-      )}
-    </div>
+        {/* Notificaciones globales */}
+        {notifications.length > 0 && (
+          <div className="fixed top-4 right-4 z-50 space-y-2">
+            {notifications.map(notification => (
+              <div
+                key={notification.id}
+                className={`p-4 rounded-lg shadow-lg flex items-center space-x-2 ${notification.type === 'error'
+                    ? 'bg-red-500'
+                    : notification.type === 'success'
+                      ? 'bg-green-500'
+                      : 'bg-blue-500'
+                  } text-white`}
+              >
+                <Bell className="w-4 h-4" />
+                <span>{notification.message}</span>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </AppProvider>
   );
 };
 

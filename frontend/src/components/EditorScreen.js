@@ -3,33 +3,36 @@ import {
   Shield, ChevronLeft, Undo2, Redo2, Save, Download, Eye,
   Loader2, Type, AlertTriangle, Lock, Plus, Settings, CheckCircle, Crown
 } from 'lucide-react';
-import { ELEMENTS } from '../constants/appConstants';
+import { ELEMENTS, SCREEN_TYPES } from '../constants/appConstants';
 import { getCanvasPermissions } from '../utils/appUtils';
+import { useAppContext } from '../context/AppContext';
 import CanvasElement from './CanvasElement';
 
-const EditorScreen = ({
-  user,
-  currentProject,
-  draggedElements,
-  selectedElement,
-  history,
-  historyIndex,
-  isPreview,
-  isSaving,
-  loading,
-  onAddElement,
-  onSelectElement,
-  onDuplicateElement,
-  onRemoveElement,
-  onUpdateElement,
-  onUndo,
-  onRedo,
-  onSave,
-  onExport,
-  onPreview,
-  onBackToDashboard,
-  getDefaultContent
-}) => {
+const EditorScreen = ({ getDefaultContent }) => {
+  // Obtener todo lo necesario del context
+  const {
+    user,
+    currentProject,
+    draggedElements,
+    selectedElement,
+    history,
+    historyIndex,
+    isPreview,
+    isSaving,
+    loading,
+    setCurrentScreen,
+    setSelectedElement,
+    setIsPreview,
+    addElement,
+    updateSelectedElement,
+    removeElement,
+    duplicateElement,
+    undo,
+    redo,
+    handleSave,
+    handleExport
+  } = useAppContext();
+
   const availableElements = user?.plan === 'free' ? ELEMENTS.free : ELEMENTS.pro;
   const permissions = getCanvasPermissions(user?.plan);
 
@@ -46,7 +49,7 @@ const EditorScreen = ({
               </div>
             </div>
             <button
-              onClick={() => onPreview(false)}
+              onClick={() => setIsPreview(false)}
               className="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 font-medium transition-colors"
             >
               Volver al Editor
@@ -85,7 +88,7 @@ const EditorScreen = ({
         <div className="flex items-center justify-between max-w-7xl mx-auto">
           <div className="flex items-center space-x-4">
             <button
-              onClick={onBackToDashboard}
+              onClick={() => setCurrentScreen(SCREEN_TYPES.DASHBOARD)}
               className="text-gray-400 hover:text-gray-600"
             >
               <ChevronLeft className="w-6 h-6" />
@@ -104,7 +107,7 @@ const EditorScreen = ({
 
           <div className="flex items-center space-x-3">
             <button
-              onClick={onUndo}
+              onClick={undo}
               disabled={historyIndex <= 0}
               className={`flex items-center px-3 py-2 rounded-lg font-medium transition-colors ${historyIndex <= 0
                   ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
@@ -115,7 +118,7 @@ const EditorScreen = ({
               <Undo2 className="w-4 h-4" />
             </button>
             <button
-              onClick={onRedo}
+              onClick={redo}
               disabled={historyIndex >= history.length - 1}
               className={`flex items-center px-3 py-2 rounded-lg font-medium transition-colors ${historyIndex >= history.length - 1
                   ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
@@ -126,7 +129,7 @@ const EditorScreen = ({
               <Redo2 className="w-4 h-4" />
             </button>
             <button
-              onClick={onSave}
+              onClick={handleSave}
               disabled={!permissions.canSave || isSaving}
               className={`flex items-center px-4 py-2 rounded-lg font-medium transition-colors ${permissions.canSave && !isSaving
                   ? 'bg-green-600 text-white hover:bg-green-700 shadow-sm'
@@ -141,14 +144,14 @@ const EditorScreen = ({
               {isSaving ? 'Guardando...' : 'Guardar'}
             </button>
             <button
-              onClick={() => onPreview(true)}
+              onClick={() => setIsPreview(true)}
               className="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 flex items-center font-medium shadow-sm transition-colors"
             >
               <Eye className="w-4 h-4 mr-2" />
               Previsualizar
             </button>
             <button
-              onClick={onExport}
+              onClick={handleExport}
               disabled={!permissions.canExport || loading}
               className={`flex items-center px-4 py-2 rounded-lg font-medium transition-colors ${permissions.canExport && !loading
                   ? 'bg-purple-600 text-white hover:bg-purple-700 shadow-sm'
@@ -188,7 +191,7 @@ const EditorScreen = ({
               {availableElements.map((element) => (
                 <div
                   key={element.id}
-                  onClick={() => onAddElement(element)}
+                  onClick={() => addElement(element)}
                   className="flex items-center p-3 mb-2 bg-white rounded-lg border-2 border-gray-200 cursor-pointer hover:bg-gray-50 hover:border-blue-300 transition-colors group"
                 >
                   <element.icon className="w-5 h-5 text-gray-600 group-hover:text-blue-600 mr-3" />
@@ -240,9 +243,9 @@ const EditorScreen = ({
                     element={element}
                     index={index}
                     selectedElement={selectedElement}
-                    onSelect={onSelectElement}
-                    onDuplicate={onDuplicateElement}
-                    onRemove={onRemoveElement}
+                    onSelect={setSelectedElement}
+                    onDuplicate={duplicateElement}
+                    onRemove={removeElement}
                     getDefaultContent={getDefaultContent}
                   />
                 ))}
@@ -268,7 +271,7 @@ const EditorScreen = ({
                   <textarea
                     rows="3"
                     value={draggedElements[selectedElement]?.settings?.content || ''}
-                    onChange={(e) => onUpdateElement('content', e.target.value)}
+                    onChange={(e) => updateSelectedElement('content', e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                     placeholder="Escribe el contenido del elemento..."
                   />
@@ -280,7 +283,7 @@ const EditorScreen = ({
                     <input
                       type="url"
                       value={draggedElements[selectedElement]?.settings?.imageUrl || ''}
-                      onChange={(e) => onUpdateElement('imageUrl', e.target.value)}
+                      onChange={(e) => updateSelectedElement('imageUrl', e.target.value)}
                       className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500"
                       placeholder="https://ejemplo.com/imagen.jpg"
                     />
@@ -292,7 +295,7 @@ const EditorScreen = ({
                   <input
                     type="color"
                     value={draggedElements[selectedElement]?.settings?.color || '#3B82F6'}
-                    onChange={(e) => onUpdateElement('color', e.target.value)}
+                    onChange={(e) => updateSelectedElement('color', e.target.value)}
                     className="w-full h-12 border border-gray-300 rounded-md cursor-pointer"
                   />
                 </div>
@@ -301,7 +304,7 @@ const EditorScreen = ({
                   <label className="block text-sm font-medium text-gray-700 mb-2">Tamaño</label>
                   <select
                     value={draggedElements[selectedElement]?.settings?.size || 'medium'}
-                    onChange={(e) => onUpdateElement('size', e.target.value)}
+                    onChange={(e) => updateSelectedElement('size', e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500"
                   >
                     <option value="small">Pequeño</option>
@@ -315,7 +318,7 @@ const EditorScreen = ({
                   <input
                     type="url"
                     value={draggedElements[selectedElement]?.settings?.link || ''}
-                    onChange={(e) => onUpdateElement('link', e.target.value)}
+                    onChange={(e) => updateSelectedElement('link', e.target.value)}
                     className="w-full px-3 py-2 border border-gray-300 rounded-md text-sm focus:ring-2 focus:ring-blue-500"
                     placeholder="https://ejemplo.com"
                   />
@@ -334,7 +337,10 @@ const EditorScreen = ({
                   <Crown className="w-10 h-10 text-purple-600 mx-auto mb-3" />
                   <h4 className="font-medium text-gray-800 mb-2">¿Necesitas más poder?</h4>
                   <p className="text-sm text-gray-600 mb-4">Desbloquea todos los elementos y funciones profesionales</p>
-                  <button className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-4 rounded-lg hover:from-blue-700 hover:to-purple-700 text-sm font-medium transition-all shadow-sm">
+                  <button
+                    onClick={() => setCurrentScreen(SCREEN_TYPES.PLANS)}
+                    className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-4 rounded-lg hover:from-blue-700 hover:to-purple-700 text-sm font-medium transition-all shadow-sm"
+                  >
                     Actualizar Plan
                   </button>
                 </div>
