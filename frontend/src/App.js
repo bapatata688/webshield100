@@ -245,6 +245,7 @@ const WebShield = () => {
             setSearchQuery={setSearchQuery}
             loading={loading}
             setLoading={setLoading}
+            onNavigateToPlans={() => setCurrentScreen(SCREEN_TYPES.PLANS)}
           />
         );
 
@@ -280,14 +281,13 @@ const WebShield = () => {
             onExport={handleExport}
             onPreview={setIsPreview}
             onBackToDashboard={() => setCurrentScreen(SCREEN_TYPES.DASHBOARD)}
-            onOpenPaymentModal={(plan) => {
+            onOpenPaymentModal={(plan) => {  // <-- AGREGAR ESTA LÍNEA
               setSelectedPlan(plan);
               setShowPayment(true);
             }}
             getDefaultContent={getDefaultContent}
           />
         );
-
       default:
         return <div>Pantalla no encontrada</div>;
     }

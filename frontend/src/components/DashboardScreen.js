@@ -5,7 +5,7 @@ import {
 } from 'lucide-react';
 import { projectsAPI, loadPaymentHistory } from '../api/config.js';
 
-const DashboardScreen = ({ user, projects, setProjects, onProjectSelect, onLogout, searchQuery, setSearchQuery, loading, setLoading }) => {
+const DashboardScreen = ({ user, projects, setProjects, onProjectSelect, onLogout, searchQuery, setSearchQuery, loading, setLoading, onNavigateToPlans }) => {
   const [activeTab, setActiveTab] = useState('projects');
   const [paymentHistory, setPaymentHistory] = useState([]);
 
@@ -167,11 +167,19 @@ const DashboardScreen = ({ user, projects, setProjects, onProjectSelect, onLogou
                 <label className="block text-sm font-medium text-gray-700 mb-1">Plan Actual</label>
                 <div className="flex items-center space-x-3">
                   <span className={`px-3 py-1 rounded-full text-sm font-medium ${user?.plan === 'free' ? 'bg-gray-100 text-gray-700' :
-                      user?.plan === 'pro' ? 'bg-blue-100 text-blue-700' :
-                        'bg-purple-100 text-purple-700'
+                    user?.plan === 'pro' ? 'bg-blue-100 text-blue-700' :
+                      'bg-purple-100 text-purple-700'
                     }`}>
                     {user?.plan?.toUpperCase()}
                   </span>
+                  {user?.plan === 'free' && (
+                    <button
+                      onClick={onNavigateToPlans} // <-- USAR LA FUNCIÓN
+                      className="text-blue-600 hover:text-blue-800 text-sm font-medium"
+                    >
+                      Actualizar Plan
+                    </button>
+                  )}
                 </div>
               </div>
             </div>
@@ -198,7 +206,7 @@ const DashboardScreen = ({ user, projects, setProjects, onProjectSelect, onLogou
                       <div className="flex justify-between items-center">
                         <span className="font-medium">${payment.amount}</span>
                         <span className={`px-2 py-1 text-xs rounded-full ${payment.status === 'completed' ? 'bg-green-100 text-green-800' :
-                            'bg-yellow-100 text-yellow-800'
+                          'bg-yellow-100 text-yellow-800'
                           }`}>
                           {payment.status}
                         </span>
@@ -231,8 +239,8 @@ const DashboardScreen = ({ user, projects, setProjects, onProjectSelect, onLogou
               <div className="flex items-center space-x-2">
                 <span className="text-sm text-gray-600">Hola, {user?.email}</span>
                 <span className={`px-2 py-1 rounded-full text-xs font-medium ${user?.plan === 'free' ? 'bg-gray-100 text-gray-700' :
-                    user?.plan === 'pro' ? 'bg-blue-100 text-blue-700' :
-                      'bg-purple-100 text-purple-700'
+                  user?.plan === 'pro' ? 'bg-blue-100 text-blue-700' :
+                    'bg-purple-100 text-purple-700'
                   }`}>
                   {user?.plan?.toUpperCase()}
                 </span>
