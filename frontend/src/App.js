@@ -8,7 +8,6 @@ import {
   validateUserPlan,
   getDefaultContent
 } from './utils/appUtils';
-import { AppProvider } from './context/AppContext';
 import { authAPI, projectsAPI } from './api/config.js';
 import LoginScreen from './components/LoginScreen';
 import DashboardScreen from './components/DashboardScreen';
@@ -281,6 +280,10 @@ const WebShield = () => {
             onExport={handleExport}
             onPreview={setIsPreview}
             onBackToDashboard={() => setCurrentScreen(SCREEN_TYPES.DASHBOARD)}
+            onOpenPaymentModal={(plan) => {
+              setSelectedPlan(plan);
+              setShowPayment(true);
+            }}
             getDefaultContent={getDefaultContent}
           />
         );

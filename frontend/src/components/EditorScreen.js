@@ -27,6 +27,7 @@ const EditorScreen = ({
   onExport,
   onPreview,
   onBackToDashboard,
+  onOpenPaymentModal,
   getDefaultContent
 }) => {
   const availableElements = user?.plan === 'free' ? ELEMENTS.free : ELEMENTS.pro;
@@ -334,7 +335,11 @@ const EditorScreen = ({
                   <h4 className="font-medium text-gray-800 mb-2">¿Necesitas más poder?</h4>
                   <p className="text-sm text-gray-600 mb-4">Desbloquea todos los elementos y funciones profesionales</p>
                   <button
-                    onClick={() => setCurrentScreen('plans')}
+                    onClick={() => onOpenPaymentModal({
+                      id: 'pro',
+                      name: 'Profesional',
+                      price: '$9.99/mes'
+                    })}
                     className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-3 px-4 rounded-lg hover:from-blue-700 hover:to-purple-700 text-sm font-medium transition-all shadow-sm"
                   >
                     Actualizar Plan
