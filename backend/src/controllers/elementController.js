@@ -15,16 +15,16 @@ class ElementController {
       );
 
       if (projectCheck.rows.length === 0) {
-        return res.status(404).json({ 
+        return res.status(404).json({
           error: ERROR_MESSAGES.PROJECT_NOT_FOUND,
-          code: 'PROJECT_NOT_FOUND' 
+          code: 'PROJECT_NOT_FOUND'
         });
       }
 
       // Verificar que el tipo de elemento es válido
       const validTypes = [...ELEMENT_TYPES.basic, ...ELEMENT_TYPES.advanced];
       if (!validTypes.includes(type)) {
-        return res.status(400).json({ 
+        return res.status(400).json({
           error: 'Tipo de elemento no válido',
           valid_types: validTypes
         });
@@ -64,9 +64,9 @@ class ElementController {
 
     } catch (error) {
       console.error('Error agregando elemento:', error);
-      res.status(500).json({ 
+      res.status(500).json({
         error: ERROR_MESSAGES.INTERNAL_ERROR,
-        code: 'INTERNAL_ERROR' 
+        code: 'INTERNAL_ERROR'
       });
     }
   }
@@ -85,9 +85,9 @@ class ElementController {
       `, [id, req.user.id]);
 
       if (elementCheck.rows.length === 0) {
-        return res.status(404).json({ 
+        return res.status(404).json({
           error: ERROR_MESSAGES.ELEMENT_NOT_FOUND,
-          code: 'ELEMENT_NOT_FOUND' 
+          code: 'ELEMENT_NOT_FOUND'
         });
       }
 
@@ -99,7 +99,7 @@ class ElementController {
       if (type) {
         const validTypes = [...ELEMENT_TYPES.basic, ...ELEMENT_TYPES.advanced];
         if (!validTypes.includes(type)) {
-          return res.status(400).json({ 
+          return res.status(400).json({
             error: 'Tipo de elemento no válido',
             valid_types: validTypes
           });
@@ -128,7 +128,7 @@ class ElementController {
       }
 
       if (updates.length === 0) {
-        return res.status(400).json({ 
+        return res.status(400).json({
           error: 'No hay campos para actualizar',
           code: 'NO_FIELDS_TO_UPDATE'
         });
@@ -150,9 +150,9 @@ class ElementController {
 
     } catch (error) {
       console.error('Error actualizando elemento:', error);
-      res.status(500).json({ 
+      res.status(500).json({
         error: ERROR_MESSAGES.INTERNAL_ERROR,
-        code: 'INTERNAL_ERROR' 
+        code: 'INTERNAL_ERROR'
       });
     }
   }
@@ -170,24 +170,24 @@ class ElementController {
       `, [id, req.user.id]);
 
       if (result.rows.length === 0) {
-        return res.status(404).json({ 
+        return res.status(404).json({
           error: ERROR_MESSAGES.ELEMENT_NOT_FOUND,
-          code: 'ELEMENT_NOT_FOUND' 
+          code: 'ELEMENT_NOT_FOUND'
         });
       }
 
       console.log(`Elemento eliminado: ${result.rows[0].type} (ID: ${id}) por ${req.user.email}`);
 
-      res.json({ 
+      res.json({
         message: 'Elemento eliminado exitosamente',
         deleted_element: result.rows[0]
       });
 
     } catch (error) {
       console.error('Error eliminando elemento:', error);
-      res.status(500).json({ 
+      res.status(500).json({
         error: ERROR_MESSAGES.INTERNAL_ERROR,
-        code: 'INTERNAL_ERROR' 
+        code: 'INTERNAL_ERROR'
       });
     }
   }
@@ -204,9 +204,9 @@ class ElementController {
       );
 
       if (projectCheck.rows.length === 0) {
-        return res.status(404).json({ 
+        return res.status(404).json({
           error: ERROR_MESSAGES.PROJECT_NOT_FOUND,
-          code: 'PROJECT_NOT_FOUND' 
+          code: 'PROJECT_NOT_FOUND'
         });
       }
 
@@ -216,7 +216,7 @@ class ElementController {
         [projectId]
       );
 
-      res.json({ 
+      res.json({
         elements: result.rows,
         project_id: projectId,
         total_elements: result.rows.length
@@ -224,9 +224,9 @@ class ElementController {
 
     } catch (error) {
       console.error('Error obteniendo elementos:', error);
-      res.status(500).json({ 
+      res.status(500).json({
         error: ERROR_MESSAGES.INTERNAL_ERROR,
-        code: 'INTERNAL_ERROR' 
+        code: 'INTERNAL_ERROR'
       });
     }
   }
@@ -244,9 +244,9 @@ class ElementController {
       );
 
       if (projectCheck.rows.length === 0) {
-        return res.status(404).json({ 
+        return res.status(404).json({
           error: ERROR_MESSAGES.PROJECT_NOT_FOUND,
-          code: 'PROJECT_NOT_FOUND' 
+          code: 'PROJECT_NOT_FOUND'
         });
       }
 
@@ -271,7 +271,7 @@ class ElementController {
 
       console.log(`Elementos reordenados en proyecto ${projectId} por ${req.user.email}`);
 
-      res.json({ 
+      res.json({
         message: 'Elementos reordenados exitosamente',
         updated_count: element_orders.length
       });
@@ -279,9 +279,9 @@ class ElementController {
     } catch (error) {
       await pool.query('ROLLBACK');
       console.error('Error reordenando elementos:', error);
-      res.status(500).json({ 
+      res.status(500).json({
         error: ERROR_MESSAGES.INTERNAL_ERROR,
-        code: 'INTERNAL_ERROR' 
+        code: 'INTERNAL_ERROR'
       });
     }
   }
@@ -299,9 +299,9 @@ class ElementController {
       `, [id, req.user.id]);
 
       if (elementResult.rows.length === 0) {
-        return res.status(404).json({ 
+        return res.status(404).json({
           error: ERROR_MESSAGES.ELEMENT_NOT_FOUND,
-          code: 'ELEMENT_NOT_FOUND' 
+          code: 'ELEMENT_NOT_FOUND'
         });
       }
 
@@ -331,9 +331,9 @@ class ElementController {
 
     } catch (error) {
       console.error('Error duplicando elemento:', error);
-      res.status(500).json({ 
+      res.status(500).json({
         error: ERROR_MESSAGES.INTERNAL_ERROR,
-        code: 'INTERNAL_ERROR' 
+        code: 'INTERNAL_ERROR'
       });
     }
   }

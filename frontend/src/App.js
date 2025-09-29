@@ -21,7 +21,7 @@ const WebShield = () => {
   const [currentScreen, setCurrentScreen] = useState(SCREEN_TYPES.LOGIN);
   const [projects, setProjects] = useState([]);
   const [currentProject, setCurrentProject] = useState(null);
-  const [draggedElements, setDraggedElements] = useState([]);
+  const [draggedElements, setDraggedElements] = useState([null]);
   const [selectedElement, setSelectedElement] = useState(null);
   const [isPreview, setIsPreview] = useState(false);
   const [loading, setLoading] = useState(false);

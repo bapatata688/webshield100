@@ -236,7 +236,7 @@ class AuthController {
         [hashedNewPassword, req.user.id]
       );
 
-      console.log(`🔐 Contraseña cambiada para usuario: ${req.user.email}`);
+      console.log(` Contraseña cambiada para usuario: ${req.user.email}`);
 
       res.json({
         message: 'Contraseña actualizada exitosamente'
