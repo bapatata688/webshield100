@@ -51,25 +51,77 @@ export const authAPI = {
 
 export const projectsAPI = {
   getAll: () => apiCall('/projects'),
+
   create: (projectData) => apiCall('/projects', {
     method: 'POST',
     body: JSON.stringify(projectData),
   }),
+
   getById: (id) => apiCall(`/projects/${id}`),
+
   update: (id, projectData) => apiCall(`/projects/${id}`, {
     method: 'PUT',
     body: JSON.stringify(projectData),
   }),
+
   delete: (id) => apiCall(`/projects/${id}`, { method: 'DELETE' }),
-  save: (id, elements) => apiCall(`/projects/${id}/save`, {
-    method: 'POST',
-    body: JSON.stringify({ elements }),
-  }),
+
+  save: (id, elements) => {
+    console.log('🚀 projectsAPI.save llamado');
+    console.log('  → ID del proyecto:', id);
+    console.log('  → Elementos recibidos:', elements);
+    console.log('  → Tipo de elements:', typeof elements);
+    console.log('  → Es un array?:', Array.isArray(elements));
+    console.log('  → Cantidad de elementos:', elements?.length);
+
+    // Validación antes de enviar
+    if (!id) {
+      console.error('❌ Error: ID del proyecto no proporcionado');
+      throw new Error('ID del proyecto es requerido');
+    }
+
+    if (!Array.isArray(elements)) {
+      console.error('❌ Error: elements no es un array:', elements);
+      throw new Error('Elements debe ser un array');
+    }
+
+    // Validar estructura de cada elemento
+    const invalidElements = elements.filter((el, index) => {
+      if (!el || typeof el !== 'object') {
+        console.error(`❌ Elemento ${index + 1} no es un objeto:`, el);
+        return true;
+      }
+      if (!el.type) {
+        console.error(`❌ Elemento ${index + 1} no tiene tipo:`, el);
+        return true;
+      }
+      return false;
+    });
+
+    if (invalidElements.length > 0) {
+      throw new Error(`${invalidElements.length} elemento(s) tienen estructura inválida`);
+    }
+
+    // Limpiar elementos antes de enviar
+    const cleanElements = elements.map(el => ({
+      type: el.type,
+      settings: el.settings || {}
+    }));
+
+    console.log('  → Elementos limpiados para enviar:', cleanElements);
+
+    return apiCall(`/projects/${id}/save`, {
+      method: 'POST',
+      body: JSON.stringify({ elements: cleanElements }),
+    });
+  },
+
   export: (id) => apiCall(`/projects/${id}/export`),
+
   search: (query) => apiCall(`/projects/search?q=${encodeURIComponent(query)}`),
+
   duplicate: (id) => apiCall(`/projects/${id}/duplicate`, { method: 'POST' }),
 };
-
 export const elementsAPI = {
   create: (projectId, elementData) => {
     console.log('Calling create element for project:', projectId, elementData);
