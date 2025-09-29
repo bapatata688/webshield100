@@ -21,7 +21,7 @@ const WebShield = () => {
   const [currentScreen, setCurrentScreen] = useState(SCREEN_TYPES.LOGIN);
   const [projects, setProjects] = useState([]);
   const [currentProject, setCurrentProject] = useState(null);
-  const [draggedElements, setDraggedElements] = useState([null]);
+  const [draggedElements, setDraggedElements] = useState([]);
   const [selectedElement, setSelectedElement] = useState(null);
   const [isPreview, setIsPreview] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -184,14 +184,43 @@ const WebShield = () => {
 
     try {
       setIsSaving(true);
+      if (!draggedElements || !Array.isArray(draggedElements)) {
+        throw new Error('Los elementos no son un array válido');
+      }
+      const validatedElements = draggedElements.map((element, index) => {
+        if (!element.type) {
+          throw new Error(`Elemento ${index + 1} no tiene tipo definido`);
+        }
+        return {
+          type: element.type,
+          settings: element.settings || {}
+        };
+      });
+      console.log('Elementos validados:', validatedElements);
+      await projectsAPI.save?.(currentProject.id, validatedElements);
+
+
+      console.log('=== DEBUGGING SAVE PROJECT ===');
+      console.log('Project ID:', currentProject.id);
+      console.log('Elements to save:', draggedElements);
+      console.log('Elements count:', draggedElements?.length);
+      console.log('Elements structure:', JSON.stringify(draggedElements, null, 2));
+
       await projectsAPI.save?.(currentProject.id, draggedElements);
       addNotification(setNotifications, 'Proyecto guardado exitosamente!', 'success');
-    } catch (error) {
+    }
+
+
+    catch (error) {
+      console.error('=== ERROR DETAILS ===');
+      console.error('Error message:', error.message);
+      console.error('Full error:', error);
       addNotification(setNotifications, `Error guardando: ${error.message}`, 'error');
     } finally {
       setIsSaving(false);
     }
   };
+
 
   const handleExport = async () => {
     const validation = validateUserPlan(user, 'export_html');

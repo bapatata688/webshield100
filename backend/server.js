@@ -61,7 +61,6 @@ app.get('/api/health', async (req, res) => {
   }
 });
 
-// ==================== RUTAS ====================
 app.use('/api/auth', authRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/elements', elementRoutes);
@@ -100,7 +99,6 @@ app.listen(PORT, async () => {
   console.log(` Seguridad: JWT activo`);
 });
 
-// Graceful shutdown
 process.on('SIGTERM', async () => {
   console.log('! Cerrando servidor...');
   await pool.end();

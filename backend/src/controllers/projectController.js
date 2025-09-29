@@ -13,9 +13,9 @@ class ProjectController {
       res.json({ projects: result.rows });
     } catch (error) {
       console.error('Error obteniendo proyectos:', error);
-      res.status(500).json({ 
+      res.status(500).json({
         error: ERROR_MESSAGES.INTERNAL_ERROR,
-        code: 'INTERNAL_ERROR' 
+        code: 'INTERNAL_ERROR'
       });
     }
   }
@@ -30,7 +30,7 @@ class ProjectController {
         'SELECT COUNT(*) FROM proyectos WHERE user_id = $1',
         [req.user.id]
       );
-      
+
       const count = parseInt(projectCount.rows[0].count);
       const userLimits = PLAN_LIMITS[req.user.plan];
 
@@ -58,9 +58,9 @@ class ProjectController {
 
     } catch (error) {
       console.error('Error creando proyecto:', error);
-      res.status(500).json({ 
+      res.status(500).json({
         error: ERROR_MESSAGES.INTERNAL_ERROR,
-        code: 'INTERNAL_ERROR' 
+        code: 'INTERNAL_ERROR'
       });
     }
   }
@@ -76,9 +76,9 @@ class ProjectController {
       );
 
       if (projectResult.rows.length === 0) {
-        return res.status(404).json({ 
+        return res.status(404).json({
           error: ERROR_MESSAGES.PROJECT_NOT_FOUND,
-          code: 'PROJECT_NOT_FOUND' 
+          code: 'PROJECT_NOT_FOUND'
         });
       }
 
@@ -95,9 +95,9 @@ class ProjectController {
 
     } catch (error) {
       console.error('Error obteniendo proyecto:', error);
-      res.status(500).json({ 
+      res.status(500).json({
         error: ERROR_MESSAGES.INTERNAL_ERROR,
-        code: 'INTERNAL_ERROR' 
+        code: 'INTERNAL_ERROR'
       });
     }
   }
@@ -114,9 +114,9 @@ class ProjectController {
       );
 
       if (result.rows.length === 0) {
-        return res.status(404).json({ 
+        return res.status(404).json({
           error: ERROR_MESSAGES.PROJECT_NOT_FOUND,
-          code: 'PROJECT_NOT_FOUND' 
+          code: 'PROJECT_NOT_FOUND'
         });
       }
 
@@ -127,9 +127,9 @@ class ProjectController {
 
     } catch (error) {
       console.error('Error actualizando proyecto:', error);
-      res.status(500).json({ 
+      res.status(500).json({
         error: ERROR_MESSAGES.INTERNAL_ERROR,
-        code: 'INTERNAL_ERROR' 
+        code: 'INTERNAL_ERROR'
       });
     }
   }
@@ -145,24 +145,24 @@ class ProjectController {
       );
 
       if (result.rows.length === 0) {
-        return res.status(404).json({ 
+        return res.status(404).json({
           error: ERROR_MESSAGES.PROJECT_NOT_FOUND,
-          code: 'PROJECT_NOT_FOUND' 
+          code: 'PROJECT_NOT_FOUND'
         });
       }
 
       console.log(`Proyecto eliminado: ${result.rows[0].name} por ${req.user.email}`);
 
-      res.json({ 
+      res.json({
         message: 'Proyecto eliminado exitosamente',
         deleted_project: result.rows[0]
       });
 
     } catch (error) {
       console.error('Error eliminando proyecto:', error);
-      res.status(500).json({ 
+      res.status(500).json({
         error: ERROR_MESSAGES.INTERNAL_ERROR,
-        code: 'INTERNAL_ERROR' 
+        code: 'INTERNAL_ERROR'
       });
     }
   }
@@ -200,9 +200,9 @@ class ProjectController {
 
     } catch (error) {
       console.error('Error en búsqueda:', error);
-      res.status(500).json({ 
+      res.status(500).json({
         error: ERROR_MESSAGES.INTERNAL_ERROR,
-        code: 'INTERNAL_ERROR' 
+        code: 'INTERNAL_ERROR'
       });
     }
   }
@@ -222,9 +222,9 @@ class ProjectController {
 
       if (originalProject.rows.length === 0) {
         await pool.query('ROLLBACK');
-        return res.status(404).json({ 
+        return res.status(404).json({
           error: ERROR_MESSAGES.PROJECT_NOT_FOUND,
-          code: 'PROJECT_NOT_FOUND' 
+          code: 'PROJECT_NOT_FOUND'
         });
       }
 
@@ -233,7 +233,7 @@ class ProjectController {
         'SELECT COUNT(*) FROM proyectos WHERE user_id = $1',
         [req.user.id]
       );
-      
+
       const count = parseInt(projectCount.rows[0].count);
       const userLimits = PLAN_LIMITS[req.user.plan];
 
@@ -274,9 +274,9 @@ class ProjectController {
     } catch (error) {
       await pool.query('ROLLBACK');
       console.error('Error duplicando proyecto:', error);
-      res.status(500).json({ 
+      res.status(500).json({
         error: ERROR_MESSAGES.INTERNAL_ERROR,
-        code: 'INTERNAL_ERROR' 
+        code: 'INTERNAL_ERROR'
       });
     }
   }
@@ -285,6 +285,15 @@ class ProjectController {
   static async saveProject(req, res) {
     const { id } = req.params;
     const { elements } = req.body;
+
+    // 🔍 LOGS DETALLADOS
+    console.log('=== SAVE PROJECT DEBUG ===');
+    console.log('Project ID:', id);
+    console.log('User ID:', req.user?.id);
+    console.log('Elements received:', elements);
+    console.log('Elements type:', typeof elements);
+    console.log('Elements length:', elements?.length);
+    console.log('Request body:', JSON.stringify(req.body, null, 2));
 
     try {
       await pool.query('BEGIN');
@@ -295,25 +304,43 @@ class ProjectController {
         [id, req.user.id]
       );
 
+      console.log('Project check result:', projectCheck.rows);
+
       if (projectCheck.rows.length === 0) {
         await pool.query('ROLLBACK');
-        return res.status(404).json({ 
+        return res.status(404).json({
           error: ERROR_MESSAGES.PROJECT_NOT_FOUND,
-          code: 'PROJECT_NOT_FOUND' 
+          code: 'PROJECT_NOT_FOUND'
         });
       }
 
       // Eliminar elementos existentes
       await pool.query('DELETE FROM elementos WHERE project_id = $1', [id]);
+      console.log('Deleted existing elements');
 
       // Insertar nuevos elementos
       if (elements && elements.length > 0) {
         for (let i = 0; i < elements.length; i++) {
           const element = elements[i];
-          await pool.query(
-            'INSERT INTO elementos (project_id, type, settings, order_position) VALUES ($1, $2, $3, $4)',
-            [id, element.type, JSON.stringify(element.settings || {}), i + 1]
-          );
+
+          // 🔍 VALIDAR ESTRUCTURA DEL ELEMENTO
+          console.log(`Processing element ${i + 1}:`, element);
+
+          if (!element.type) {
+            console.error('Element missing type:', element);
+            throw new Error(`Elemento ${i + 1} no tiene tipo definido`);
+          }
+
+          try {
+            await pool.query(
+              'INSERT INTO elementos (project_id, type, settings, order_position) VALUES ($1, $2, $3, $4)',
+              [id, element.type, JSON.stringify(element.settings || {}), i + 1]
+            );
+            console.log(`Element ${i + 1} inserted successfully`);
+          } catch (dbError) {
+            console.error(`Error inserting element ${i + 1}:`, dbError);
+            throw dbError;
+          }
         }
       }
 
@@ -325,23 +352,26 @@ class ProjectController {
 
       await pool.query('COMMIT');
 
-      console.log(`Proyecto guardado: ID ${id} por ${req.user.email}`);
+      console.log(`Proyecto guardado exitosamente: ID ${id}`);
 
-      res.json({ 
+      res.json({
         message: 'Proyecto guardado exitosamente en la nube',
         elements_count: elements ? elements.length : 0
       });
 
     } catch (error) {
       await pool.query('ROLLBACK');
-      console.error('Error guardando proyecto:', error);
-      res.status(500).json({ 
-        error: ERROR_MESSAGES.INTERNAL_ERROR,
-        code: 'INTERNAL_ERROR' 
+      console.error('Error detallado guardando proyecto:', error);
+      console.error('Error stack:', error.stack);
+
+      // 🔍 RESPUESTA MÁS ESPECÍFICA
+      res.status(500).json({
+        error: error.message || ERROR_MESSAGES.INTERNAL_ERROR,
+        code: 'SAVE_ERROR',
+        details: process.env.NODE_ENV === 'development' ? error.stack : undefined
       });
     }
   }
-
   // Exportar proyecto (solo Pro/Premium)
   static async exportProject(req, res) {
     const { id } = req.params;
@@ -353,9 +383,9 @@ class ProjectController {
       );
 
       if (projectResult.rows.length === 0) {
-        return res.status(404).json({ 
+        return res.status(404).json({
           error: ERROR_MESSAGES.PROJECT_NOT_FOUND,
-          code: 'PROJECT_NOT_FOUND' 
+          code: 'PROJECT_NOT_FOUND'
         });
       }
 
@@ -366,7 +396,7 @@ class ProjectController {
 
       const project = projectResult.rows[0];
       const elements = elementsResult.rows;
-      
+
       // Importar el generador de HTML
       const { generateHTML } = require('../services/htmlGenerator');
       const html = generateHTML(project.name, elements);
@@ -380,9 +410,9 @@ class ProjectController {
 
     } catch (error) {
       console.error('Error exportando proyecto:', error);
-      res.status(500).json({ 
+      res.status(500).json({
         error: ERROR_MESSAGES.INTERNAL_ERROR,
-        code: 'INTERNAL_ERROR' 
+        code: 'INTERNAL_ERROR'
       });
     }
   }

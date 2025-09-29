@@ -12,7 +12,7 @@ const { schemas, validateSchema, validateParams, validateParamsSchema, validateQ
 router.get('/',
   authenticateToken,
   ProjectController.getAllProjects
-);
+)
 
 // POST /api/projects - Crear nuevo proyecto
 router.post('/',
