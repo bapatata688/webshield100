@@ -89,6 +89,8 @@ const WebShield = () => {
   };
 
   const handleProjectSelect = (project) => {
+    console.log('Proyecto recibido:', project);
+    console.log('Elementos a cargar:', project.elements);
     setCurrentProject(project);
     if (project.elements) {
       setDraggedElements(project.elements);
@@ -98,7 +100,6 @@ const WebShield = () => {
     }
     setCurrentScreen(SCREEN_TYPES.EDITOR);
   };
-
   const handlePlanSelect = (plan) => {
     console.log("Plan selected:", plan);
     setSelectedPlan(plan);
@@ -351,6 +352,7 @@ const WebShield = () => {
         return <div>Pantalla no encontrada</div>;
     }
   };
+
 
   return (
     <div className="min-h-screen bg-gray-50 font-sans">

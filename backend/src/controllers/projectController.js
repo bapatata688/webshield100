@@ -66,8 +66,11 @@ class ProjectController {
   }
 
   // Obtener proyecto específico con elementos
+  // Obtener proyecto específico con elementos
   static async getProject(req, res) {
     const { id } = req.params;
+    console.log('Elementos raw desde DB:', elementsResult.rows);
+    console.log('Elementos transformados:', project.elements);
 
     try {
       const projectResult = await pool.query(
@@ -89,7 +92,17 @@ class ProjectController {
       );
 
       const project = projectResult.rows[0];
-      project.elements = elementsResult.rows;
+
+      // AQUÍ ESTÁ EL CAMBIO IMPORTANTE:
+      // Reconstruir los elementos con la estructura correcta
+      project.elements = elementsResult.rows.map(el => ({
+        id: el.id,
+        type: el.type,
+        // Spread settings para que sus propiedades queden al nivel raíz
+        ...el.settings,
+        // Mantener settings también por compatibilidad
+        settings: el.settings
+      }));
 
       res.json({ project });
 
@@ -101,7 +114,6 @@ class ProjectController {
       });
     }
   }
-
   // Actualizar proyecto
   static async updateProject(req, res) {
     const { id } = req.params;
