@@ -286,7 +286,6 @@ class ProjectController {
     const { id } = req.params;
     const { elements } = req.body;
 
-    // 🔍 LOGS DETALLADOS
     console.log('=== SAVE PROJECT DEBUG ===');
     console.log('Project ID:', id);
     console.log('User ID:', req.user?.id);
@@ -323,7 +322,6 @@ class ProjectController {
         for (let i = 0; i < elements.length; i++) {
           const element = elements[i];
 
-          // 🔍 VALIDAR ESTRUCTURA DEL ELEMENTO
           console.log(`Processing element ${i + 1}:`, element);
 
           if (!element.type) {
