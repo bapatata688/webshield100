@@ -364,7 +364,6 @@ class ProjectController {
       console.error('Error detallado guardando proyecto:', error);
       console.error('Error stack:', error.stack);
 
-      // 🔍 RESPUESTA MÁS ESPECÍFICA
       res.status(500).json({
         error: error.message || ERROR_MESSAGES.INTERNAL_ERROR,
         code: 'SAVE_ERROR',
