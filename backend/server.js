@@ -2,14 +2,10 @@ const express = require('express');
 const cors = require('cors');
 require('dotenv').config();
 
-// Importar configuración
 const { pool, createTablesIfNotExist } = require('./src/config/database');
 const { PORT } = require('./src/config/constants');
-
-// Importar middlewares
 const securityMiddleware = require('./src/middleware/security');
 
-// Importar rutas
 const authRoutes = require('./src/routes/authRoutes');
 const projectRoutes = require('./src/routes/projectRoutes');
 const elementRoutes = require('./src/routes/elementRoutes');
@@ -17,24 +13,27 @@ const paymentRoutes = require('./src/routes/paymentRoutes');
 const templateRoutes = require('./src/routes/templateRoutes');
 
 const app = express();
-
 app.set('trust proxy', 1);
 
-securityMiddleware(app);
-
-// CORS
+// 1. CORS PRIMERO (solo una vez)
 app.use(cors({
   origin: [
     'https://webshield100.onrender.com',
     'http://localhost:3000',
     'https://webshield100-fronted.onrender.com'
   ],
-  credentials: true
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
-// Body parser
+// 2. Body parser SEGUNDO
 app.use(express.json({ limit: '10mb' }));
 
+// 3. Security middleware TERCERO (solo una vez)
+securityMiddleware(app);
+
+// Health check
 app.get('/api/health', async (req, res) => {
   try {
     const dbStart = Date.now();
@@ -61,13 +60,14 @@ app.get('/api/health', async (req, res) => {
   }
 });
 
+// Rutas
 app.use('/api/auth', authRoutes);
 app.use('/api/projects', projectRoutes);
 app.use('/api/elements', elementRoutes);
 app.use('/api/payments', paymentRoutes);
 app.use('/api/templates', templateRoutes);
 
-// ==================== MANEJO DE ERRORES ====================
+// Manejo de errores
 app.use((err, req, res, next) => {
   console.error('Error no controlado:', err);
   res.status(500).json({
@@ -83,29 +83,29 @@ app.use('*', (req, res) => {
 async function checkDatabaseConnection() {
   try {
     await pool.query('SELECT NOW()');
-    console.log(' Conexión a PostgreSQL establecida');
+    console.log('Conexion a PostgreSQL establecida');
     await createTablesIfNotExist();
   } catch (error) {
-    console.error(' Error conectando a PostgreSQL:', error);
+    console.error('Error conectando a PostgreSQL:', error);
     process.exit(1);
   }
 }
 
 app.listen(PORT, async () => {
   await checkDatabaseConnection();
-  console.log(` WebShield Backend ejecutándose en puerto ${PORT}`);
-  console.log(` Ambiente: ${process.env.NODE_ENV || 'development'}`);
-  console.log(` Seguridad: JWT activo`);
+  console.log(`WebShield Backend ejecutandose en puerto ${PORT}`);
+  console.log(`Ambiente: ${process.env.NODE_ENV || 'development'}`);
+  console.log(`Seguridad: JWT activo`);
 });
 
 process.on('SIGTERM', async () => {
-  console.log('! Cerrando servidor...');
+  console.log('Cerrando servidor...');
   await pool.end();
   process.exit(0);
 });
 
 process.on('SIGINT', async () => {
-  console.log('! Cerrando servidor...');
+  console.log('Cerrando servidor...');
   await pool.end();
   process.exit(0);
 });

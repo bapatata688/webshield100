@@ -2,7 +2,6 @@ const helmet = require('helmet');
 const rateLimit = require('express-rate-limit');
 const { RATE_LIMITS } = require('../config/constants');
 
-// Middleware personalizado para sanitización XSS
 const sanitizeInput = (req, res, next) => {
   const sanitizeValue = (value) => {
     if (typeof value === 'string') {
@@ -32,59 +31,50 @@ const sanitizeInput = (req, res, next) => {
   next();
 };
 
-// Rate limiting general
 const generalLimiter = rateLimit({
   windowMs: RATE_LIMITS.general.windowMs,
   max: RATE_LIMITS.general.max,
   message: {
-    error: 'Demasiadas solicitudes desde esta IP. Intenta más tarde.',
+    error: 'Demasiadas solicitudes desde esta IP. Intenta mas tarde.',
     retry_after: '15 minutes'
   },
   standardHeaders: true,
   legacyHeaders: false,
 });
 
-// Rate limiting específico para login (protección brute force)
 const loginLimiter = rateLimit({
   windowMs: RATE_LIMITS.login.windowMs,
   max: RATE_LIMITS.login.max,
   message: {
-    error: 'Demasiados intentos de inicio de sesión. Intenta en 15 minutos.',
+    error: 'Demasiados intentos de inicio de sesion. Intenta en 15 minutos.',
     security_notice: 'Por tu seguridad, hemos bloqueado temporalmente esta IP.'
   },
   standardHeaders: true,
   legacyHeaders: false,
 });
 
-// Rate limiting para registro
 const registerLimiter = rateLimit({
   windowMs: RATE_LIMITS.register.windowMs,
   max: RATE_LIMITS.register.max,
   message: {
-    error: 'Límite de registros alcanzado. Intenta en 1 hora.',
+    error: 'Limite de registros alcanzado. Intenta en 1 hora.',
   },
 });
 
-// Configuración de Helmet para headers de seguridad
+// Helmet MÁS PERMISIVO para APIs
 const helmetConfig = helmet({
-  contentSecurityPolicy: {
-    directives: {
-      defaultSrc: ["'self'"],
-      styleSrc: ["'self'", "'unsafe-inline'"],
-      scriptSrc: ["'self'"],
-      imgSrc: ["'self'", "data:", "https:"],
-    },
-  },
+  contentSecurityPolicy: false, // Deshabilitar CSP para APIs
+  crossOriginEmbedderPolicy: false,
+  crossOriginResourcePolicy: { policy: "cross-origin" }
 });
 
-// Función principal para aplicar middlewares de seguridad
 const applySecurityMiddleware = (app) => {
   // Headers de seguridad
   app.use(helmetConfig);
-  
+
   // Rate limiting general
   app.use(generalLimiter);
-  
+
   // Sanitización de inputs
   app.use(sanitizeInput);
 };
