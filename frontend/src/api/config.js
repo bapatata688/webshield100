@@ -67,32 +67,32 @@ export const projectsAPI = {
   delete: (id) => apiCall(`/projects/${id}`, { method: 'DELETE' }),
 
   save: (id, elements) => {
-    console.log('🚀 projectsAPI.save llamado');
-    console.log('  → ID del proyecto:', id);
-    console.log('  → Elementos recibidos:', elements);
-    console.log('  → Tipo de elements:', typeof elements);
-    console.log('  → Es un array?:', Array.isArray(elements));
-    console.log('  → Cantidad de elementos:', elements?.length);
+    console.log(' projectsAPI.save llamado');
+    console.log('  > iD del proyecto:', id);
+    console.log('  > elementos recibidos:', elements);
+    console.log('  > tipo de elements:', typeof elements);
+    console.log('  > es un array?:', Array.isArray(elements));
+    console.log('  > cantidad de elementos:', elements?.length);
 
     // Validación antes de enviar
     if (!id) {
-      console.error('❌ Error: ID del proyecto no proporcionado');
+      console.error(' Error: ID del proyecto no proporcionado');
       throw new Error('ID del proyecto es requerido');
     }
 
     if (!Array.isArray(elements)) {
-      console.error('❌ Error: elements no es un array:', elements);
+      console.error(' Error: elements no es un array:', elements);
       throw new Error('Elements debe ser un array');
     }
 
     // Validar estructura de cada elemento
     const invalidElements = elements.filter((el, index) => {
       if (!el || typeof el !== 'object') {
-        console.error(`❌ Elemento ${index + 1} no es un objeto:`, el);
+        console.error(` Elemento ${index + 1} no es un objeto:`, el);
         return true;
       }
       if (!el.type) {
-        console.error(`❌ Elemento ${index + 1} no tiene tipo:`, el);
+        console.error(` Elemento ${index + 1} no tiene tipo:`, el);
         return true;
       }
       return false;
