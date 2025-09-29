@@ -282,16 +282,15 @@ class ProjectController {
   }
 
   // Guardar proyecto completo (solo Pro/Premium)
+  // Guardar proyecto completo (Pro/Premium)
   static async saveProject(req, res) {
     const { id } = req.params;
-    const { elements } = req.body;
+    const { name, elements } = req.body;
 
     console.log('=== SAVE PROJECT DEBUG ===');
     console.log('Project ID:', id);
     console.log('User ID:', req.user?.id);
     console.log('Elements received:', elements);
-    console.log('Elements type:', typeof elements);
-    console.log('Elements length:', elements?.length);
     console.log('Request body:', JSON.stringify(req.body, null, 2));
 
     try {
@@ -299,54 +298,51 @@ class ProjectController {
 
       // Verificar que el proyecto existe y pertenece al usuario
       const projectCheck = await pool.query(
-        'SELECT id FROM proyectos WHERE id = $1 AND user_id = $2',
+        'SELECT * FROM proyectos WHERE id = $1 AND user_id = $2',
         [id, req.user.id]
       );
-
-      console.log('Project check result:', projectCheck.rows);
 
       if (projectCheck.rows.length === 0) {
         await pool.query('ROLLBACK');
         return res.status(404).json({
-          error: ERROR_MESSAGES.PROJECT_NOT_FOUND,
+          error: 'Proyecto no encontrado',
           code: 'PROJECT_NOT_FOUND'
         });
+      }
+
+      // Actualizar nombre del proyecto y timestamp
+      if (name) {
+        await pool.query(
+          'UPDATE proyectos SET name = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2',
+          [name.trim(), id]
+        );
       }
 
       // Eliminar elementos existentes
       await pool.query('DELETE FROM elementos WHERE project_id = $1', [id]);
       console.log('Deleted existing elements');
 
-      // Insertar nuevos elementos
+      // Insertar nuevos elementos completos
       if (elements && elements.length > 0) {
         for (let i = 0; i < elements.length; i++) {
           const element = elements[i];
 
-          console.log(`Processing element ${i + 1}:`, element);
-
           if (!element.type) {
-            console.error('Element missing type:', element);
             throw new Error(`Elemento ${i + 1} no tiene tipo definido`);
           }
 
-          try {
-            await pool.query(
-              'INSERT INTO elementos (project_id, type, settings, order_position) VALUES ($1, $2, $3, $4)',
-              [id, element.type, JSON.stringify(element.settings || {}), i + 1]
-            );
-            console.log(`Element ${i + 1} inserted successfully`);
-          } catch (dbError) {
-            console.error(`Error inserting element ${i + 1}:`, dbError);
-            throw dbError;
-          }
+          // Guardar todos los campos del elemento en settings excepto type
+          const fullSettings = { ...element };
+          delete fullSettings.type;
+
+          await pool.query(
+            'INSERT INTO elementos (project_id, type, settings, order_position) VALUES ($1, $2, $3, $4)',
+            [id, element.type, JSON.stringify(fullSettings || {}), i + 1]
+          );
+
+          console.log(`Element ${i + 1} inserted successfully`);
         }
       }
-
-      // Actualizar timestamp del proyecto
-      await pool.query(
-        'UPDATE proyectos SET updated_at = CURRENT_TIMESTAMP WHERE id = $1',
-        [id]
-      );
 
       await pool.query('COMMIT');
 
@@ -359,11 +355,11 @@ class ProjectController {
 
     } catch (error) {
       await pool.query('ROLLBACK');
-      console.error('Error detallado guardando proyecto:', error);
-      console.error('Error stack:', error.stack);
+      console.error('Error guardando proyecto:', error);
+      console.error('Stack:', error.stack);
 
       res.status(500).json({
-        error: error.message || ERROR_MESSAGES.INTERNAL_ERROR,
+        error: error.message || 'Error interno',
         code: 'SAVE_ERROR',
         details: process.env.NODE_ENV === 'development' ? error.stack : undefined
       });
