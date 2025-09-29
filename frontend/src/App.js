@@ -171,51 +171,47 @@ const WebShield = () => {
 
   // Funciones de guardado y exportación
   const handleSave = async () => {
-    console.log('🔵 handleSave iniciado');
+    console.log(' handleSave iniciado');
 
     // Validar permisos del usuario
     const validation = validateUserPlan(user, 'save_project');
     if (!validation.allowed) {
-      console.log('❌ Usuario no tiene permisos para guardar');
+      console.log(' Usuario no tiene permisos para guardar');
       addNotification(setNotifications, validation.reason, 'error');
       return;
     }
 
     // Validar que hay un proyecto activo
     if (!currentProject?.id) {
-      console.log('❌ No hay proyecto activo');
+      console.log(' No hay proyecto activo');
       addNotification(setNotifications, 'Error: No hay proyecto activo para guardar.', 'error');
       return;
     }
 
-    // 🔒 PREVENIR MÚLTIPLES LLAMADAS SIMULTÁNEAS
     if (isSaving) {
-      console.log('⚠️ Ya hay un guardado en proceso, ignorando llamada duplicada');
+      console.log(' Ya hay un guardado en proceso, ignorando llamada duplicada');
       return;
     }
 
     try {
       setIsSaving(true);
-      console.log('====================================');
-      console.log('=== INICIANDO GUARDADO DE PROYECTO ===');
-      console.log('====================================');
-      console.log('📋 Project ID:', currentProject.id);
-      console.log('📋 Project Name:', currentProject.name);
-      console.log('📋 draggedElements:', draggedElements);
-      console.log('📋 Tipo de draggedElements:', typeof draggedElements);
-      console.log('📋 Es array?:', Array.isArray(draggedElements));
-      console.log('📋 Cantidad:', draggedElements?.length);
+      console.log(' Project ID:', currentProject.id);
+      console.log(' Project Name:', currentProject.name);
+      console.log(' draggedElements:', draggedElements);
+      console.log(' Tipo de draggedElements:', typeof draggedElements);
+      console.log(' Es array?:', Array.isArray(draggedElements));
+      console.log(' Cantidad:', draggedElements?.length);
 
       // Validación de draggedElements
       if (!draggedElements) {
-        console.log('⚠️ draggedElements es null/undefined, usando array vacío');
+        console.log(' draggedElements es null/undefined, usando array vacío');
         await projectsAPI.save(currentProject.id, []);
         addNotification(setNotifications, 'Proyecto guardado (sin elementos)', 'success');
         return;
       }
 
       if (!Array.isArray(draggedElements)) {
-        console.error('❌ draggedElements no es un array:', draggedElements);
+        console.error(' draggedElements no es un array:', draggedElements);
         throw new Error('Error interno: Los elementos no tienen el formato correcto');
       }
 
@@ -229,22 +225,15 @@ const WebShield = () => {
       });
 
       // Llamar al API
-      console.log('🚀 Llamando a projectsAPI.save...');
       const response = await projectsAPI.save(currentProject.id, draggedElements);
 
-      console.log('✅ Respuesta del servidor:', response);
-      console.log('====================================');
       addNotification(setNotifications, 'Proyecto guardado exitosamente!', 'success');
 
     } catch (error) {
-      console.log('====================================');
-      console.error('❌ ERROR EN GUARDADO');
-      console.error('====================================');
       console.error('Tipo de error:', error.constructor.name);
       console.error('Mensaje:', error.message);
       console.error('Stack:', error.stack);
       console.error('Error completo:', error);
-      console.log('====================================');
 
       // Mensaje más específico para el usuario
       let userMessage = 'Error guardando proyecto';
@@ -258,7 +247,7 @@ const WebShield = () => {
 
       addNotification(setNotifications, userMessage, 'error');
     } finally {
-      console.log('🔵 Finalizando handleSave, liberando isSaving');
+      console.log(' Finalizando handleSave, liberando isSaving');
       setIsSaving(false);
     }
   };
