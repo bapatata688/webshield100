@@ -4,6 +4,7 @@ import {
   FileCode, Search, Edit2, Check, X
 } from 'lucide-react';
 import { projectsAPI, loadPaymentHistory } from '../api/config.js';
+import '../App.css'
 
 const DashboardScreen = ({ user, projects, setProjects, onProjectSelect, onLogout, searchQuery, setSearchQuery, loading, setLoading, onNavigateToPlans }) => {
   const [activeTab, setActiveTab] = useState('projects');
@@ -268,8 +269,8 @@ const DashboardScreen = ({ user, projects, setProjects, onProjectSelect, onLogou
                 <label className="block text-sm font-medium text-gray-700 mb-1">Plan Actual</label>
                 <div className="flex items-center space-x-3">
                   <span className={`px-3 py-1 rounded-full text-sm font-medium transition-all duration-200 ${user?.plan === 'free' ? 'bg-gray-100 text-gray-700' :
-                      user?.plan === 'pro' ? 'bg-blue-100 text-blue-700' :
-                        'bg-purple-100 text-purple-700'
+                    user?.plan === 'pro' ? 'bg-blue-100 text-blue-700' :
+                      'bg-purple-100 text-purple-700'
                     }`}>
                     {user?.plan?.toUpperCase()}
                   </span>
@@ -307,7 +308,7 @@ const DashboardScreen = ({ user, projects, setProjects, onProjectSelect, onLogou
                       <div className="flex justify-between items-center">
                         <span className="font-medium">${payment.amount}</span>
                         <span className={`px-2 py-1 text-xs rounded-full transition-all duration-200 ${payment.status === 'completed' ? 'bg-green-100 text-green-800' :
-                            'bg-yellow-100 text-yellow-800'
+                          'bg-yellow-100 text-yellow-800'
                           }`}>
                           {payment.status}
                         </span>
@@ -340,8 +341,8 @@ const DashboardScreen = ({ user, projects, setProjects, onProjectSelect, onLogou
               <div className="flex items-center space-x-2">
                 <span className="text-sm text-gray-600">Hola, {user?.email}</span>
                 <span className={`px-2 py-1 rounded-full text-xs font-medium transition-all duration-200 ${user?.plan === 'free' ? 'bg-gray-100 text-gray-700' :
-                    user?.plan === 'pro' ? 'bg-blue-100 text-blue-700' :
-                      'bg-purple-100 text-purple-700'
+                  user?.plan === 'pro' ? 'bg-blue-100 text-blue-700' :
+                    'bg-purple-100 text-purple-700'
                   }`}>
                   {user?.plan?.toUpperCase()}
                 </span>
@@ -363,8 +364,8 @@ const DashboardScreen = ({ user, projects, setProjects, onProjectSelect, onLogou
           <button
             onClick={() => setActiveTab('projects')}
             className={`px-4 py-2 rounded-md font-medium transition-all duration-200 ${activeTab === 'projects'
-                ? 'bg-white text-blue-600 shadow-sm transform scale-105'
-                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+              ? 'bg-white text-blue-600 shadow-sm transform scale-105'
+              : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
               }`}
           >
             <Home className="w-4 h-4 inline mr-2" />
@@ -374,8 +375,8 @@ const DashboardScreen = ({ user, projects, setProjects, onProjectSelect, onLogou
           <button
             onClick={() => setActiveTab('account')}
             className={`px-4 py-2 rounded-md font-medium transition-all duration-200 ${activeTab === 'account'
-                ? 'bg-white text-blue-600 shadow-sm transform scale-105'
-                : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
+              ? 'bg-white text-blue-600 shadow-sm transform scale-105'
+              : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
               }`}
           >
             <User className="w-4 h-4 inline mr-2" />
@@ -387,49 +388,49 @@ const DashboardScreen = ({ user, projects, setProjects, onProjectSelect, onLogou
         {activeTab === 'account' && <AccountTab />}
       </div>
 
-      <style jsx>{`
-        @keyframes fade-in {
-          from {
-            opacity: 0;
-          }
-          to {
-            opacity: 1;
-          }
-        }
-
-        @keyframes slide-up {
-          from {
-            opacity: 0;
-            transform: translateY(20px);
-          }
-          to {
-            opacity: 1;
-            transform: translateY(0);
-          }
-        }
-
-        @keyframes pulse-slow {
-          0%, 100% {
-            opacity: 1;
-          }
-          50% {
-            opacity: 0.8;
-          }
-        }
-
-        .animate-fade-in {
-          animation: fade-in 0.3s ease-out;
-        }
-
-        .animate-slide-up {
-          animation: slide-up 0.4s ease-out;
-          animation-fill-mode: both;
-        }
-
-        .animate-pulse-slow {
-          animation: pulse-slow 3s ease-in-out infinite;
-        }
-      `}</style>
+      {/* <style jsx>{` */}
+      {/*   @keyframes fade-in { */}
+      {/*     from { */}
+      {/*       opacity: 0; */}
+      {/*     } */}
+      {/*     to { */}
+      {/*       opacity: 1; */}
+      {/*     } */}
+      {/*   } */}
+      {/**/}
+      {/*   @keyframes slide-up { */}
+      {/*     from { */}
+      {/*       opacity: 0; */}
+      {/*       transform: translateY(20px); */}
+      {/*     } */}
+      {/*     to { */}
+      {/*       opacity: 1; */}
+      {/*       transform: translateY(0); */}
+      {/*     } */}
+      {/*   } */}
+      {/**/}
+      {/*   @keyframes pulse-slow { */}
+      {/*     0%, 100% { */}
+      {/*       opacity: 1; */}
+      {/*     } */}
+      {/*     50% { */}
+      {/*       opacity: 0.8; */}
+      {/*     } */}
+      {/*   } */}
+      {/**/}
+      {/*   .animate-fade-in { */}
+      {/*     animation: fade-in 0.3s ease-out; */}
+      {/*   } */}
+      {/**/}
+      {/*   .animate-slide-up { */}
+      {/*     animation: slide-up 0.4s ease-out; */}
+      {/*     animation-fill-mode: both; */}
+      {/*   } */}
+      {/**/}
+      {/*   .animate-pulse-slow { */}
+      {/*     animation: pulse-slow 3s ease-in-out infinite; */}
+      {/*   } */}
+      {/* `}</style> */}
     </div>
   );
 };
