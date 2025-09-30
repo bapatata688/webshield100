@@ -65,12 +65,8 @@ class ProjectController {
     }
   }
 
-  // Obtener proyecto específico con elementos
-  // Obtener proyecto específico con elementos
   static async getProject(req, res) {
     const { id } = req.params;
-    console.log('Elementos raw desde DB:', elementsResult.rows);
-    console.log('Elementos transformados:', project.elements);
 
     try {
       const projectResult = await pool.query(
@@ -93,16 +89,16 @@ class ProjectController {
 
       const project = projectResult.rows[0];
 
-      // AQUÍ ESTÁ EL CAMBIO IMPORTANTE:
+      console.log('Elementos raw desde DB:', elementsResult.rows);
+
       // Reconstruir los elementos con la estructura correcta
       project.elements = elementsResult.rows.map(el => ({
         id: el.id,
         type: el.type,
-        // Spread settings para que sus propiedades queden al nivel raíz
-        ...el.settings,
-        // Mantener settings también por compatibilidad
-        settings: el.settings
+        settings: el.settings || {}
       }));
+
+      console.log('Elementos transformados:', project.elements);
 
       res.json({ project });
 
@@ -113,8 +109,7 @@ class ProjectController {
         code: 'INTERNAL_ERROR'
       });
     }
-  }
-  // Actualizar proyecto
+  }  // Actualizar proyecto
   static async updateProject(req, res) {
     const { id } = req.params;
     const { name } = req.body;
@@ -297,18 +292,15 @@ class ProjectController {
   // Guardar proyecto completo (Pro/Premium)
   static async saveProject(req, res) {
     const { id } = req.params;
-    const { name, elements } = req.body;
+    const { elements } = req.body;  // Ya no necesitas name aquí
 
-    console.log('=== SAVE PROJECT DEBUG ===');
+    console.log('=== SAVE PROJECT ===');
     console.log('Project ID:', id);
-    console.log('User ID:', req.user?.id);
-    console.log('Elements received:', elements);
-    console.log('Request body:', JSON.stringify(req.body, null, 2));
+    console.log('Elements:', JSON.stringify(elements, null, 2));
 
     try {
       await pool.query('BEGIN');
 
-      // Verificar que el proyecto existe y pertenece al usuario
       const projectCheck = await pool.query(
         'SELECT * FROM proyectos WHERE id = $1 AND user_id = $2',
         [id, req.user.id]
@@ -322,19 +314,16 @@ class ProjectController {
         });
       }
 
-      // Actualizar nombre del proyecto y timestamp
-      if (name) {
-        await pool.query(
-          'UPDATE proyectos SET name = $1, updated_at = CURRENT_TIMESTAMP WHERE id = $2',
-          [name.trim(), id]
-        );
-      }
+      // Actualizar timestamp
+      await pool.query(
+        'UPDATE proyectos SET updated_at = CURRENT_TIMESTAMP WHERE id = $1',
+        [id]
+      );
 
       // Eliminar elementos existentes
       await pool.query('DELETE FROM elementos WHERE project_id = $1', [id]);
-      console.log('Deleted existing elements');
 
-      // Insertar nuevos elementos completos
+      // Insertar nuevos elementos
       if (elements && elements.length > 0) {
         for (let i = 0; i < elements.length; i++) {
           const element = elements[i];
@@ -343,41 +332,32 @@ class ProjectController {
             throw new Error(`Elemento ${i + 1} no tiene tipo definido`);
           }
 
-          // Guardar todos los campos del elemento en settings excepto type
-          const fullSettings = { ...element };
-          delete fullSettings.type;
-
           await pool.query(
             'INSERT INTO elementos (project_id, type, settings, order_position) VALUES ($1, $2, $3, $4)',
-            [id, element.type, JSON.stringify(fullSettings || {}), i + 1]
+            [id, element.type, JSON.stringify(element.settings || {}), i + 1]
           );
 
-          console.log(`Element ${i + 1} inserted successfully`);
+          console.log(`Elemento ${i + 1} insertado:`, element.type);
         }
       }
 
       await pool.query('COMMIT');
-
-      console.log(`Proyecto guardado exitosamente: ID ${id}`);
+      console.log(`✓ Proyecto ${id} guardado con ${elements?.length || 0} elementos`);
 
       res.json({
-        message: 'Proyecto guardado exitosamente en la nube',
-        elements_count: elements ? elements.length : 0
+        message: 'Proyecto guardado exitosamente',
+        elements_count: elements?.length || 0
       });
 
     } catch (error) {
       await pool.query('ROLLBACK');
-      console.error('Error guardando proyecto:', error);
-      console.error('Stack:', error.stack);
-
+      console.error('Error guardando:', error);
       res.status(500).json({
-        error: error.message || 'Error interno',
-        code: 'SAVE_ERROR',
-        details: process.env.NODE_ENV === 'development' ? error.stack : undefined
+        error: error.message,
+        code: 'SAVE_ERROR'
       });
     }
-  }
-  // Exportar proyecto (solo Pro/Premium)
+  }  // Exportar proyecto (solo Pro/Premium)
   static async exportProject(req, res) {
     const { id } = req.params;
 

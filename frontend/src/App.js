@@ -88,17 +88,36 @@ const WebShield = () => {
     setCurrentScreen(SCREEN_TYPES.LOGIN);
   };
 
-  const handleProjectSelect = (project) => {
-    console.log('Proyecto recibido:', project);
-    console.log('Elementos a cargar:', project.elements);
-    setCurrentProject(project);
-    if (project.elements) {
-      setDraggedElements(project.elements);
-      saveToHistory([], -1, project.elements, setHistory, setHistoryIndex);
-    } else {
-      setDraggedElements([]);
+  const handleProjectSelect = async (project) => {
+    console.log(' Seleccionando proyecto:', project.id);
+
+    try {
+      setLoading(true);
+
+      // Cargar proyecto completo con elementos
+      const response = await projectsAPI.getById(project.id);
+      console.log(' Proyecto completo recibido:', response);
+
+      const fullProject = response.project;
+
+      setCurrentProject(fullProject);
+
+      if (fullProject.elements && fullProject.elements.length > 0) {
+        console.log(' Cargando', fullProject.elements.length, 'elementos');
+        setDraggedElements(fullProject.elements);
+        saveToHistory([], -1, fullProject.elements, setHistory, setHistoryIndex);
+      } else {
+        console.log(' Proyecto sin elementos');
+        setDraggedElements([]);
+      }
+
+      setCurrentScreen(SCREEN_TYPES.EDITOR);
+    } catch (error) {
+      console.error(' Error cargando proyecto:', error);
+      addNotification(setNotifications, 'Error cargando proyecto', 'error');
+    } finally {
+      setLoading(false);
     }
-    setCurrentScreen(SCREEN_TYPES.EDITOR);
   };
   const handlePlanSelect = (plan) => {
     console.log("Plan selected:", plan);
