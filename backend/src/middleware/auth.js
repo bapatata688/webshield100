@@ -17,7 +17,7 @@ const authenticateToken = async (req, res, next) => {
   try {
     const decoded = jwt.verify(token, JWT_SECRET);
 
-    // Verificar que el usuario aún existe y está activo
+    // Verificar que el usuario aun existe y está activo
     const userResult = await pool.query(
       'SELECT id, email, plan FROM usuarios WHERE id = $1',
       [decoded.userId]

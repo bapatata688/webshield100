@@ -10,36 +10,36 @@ const { schemas, validateSchema } = require('../models/schemas');
 // ==================== RUTAS PÚBLICAS ====================
 
 // POST /api/auth/register - Registro de usuario
-router.post('/register', 
-  registerLimiter, 
-  validateSchema(schemas.register), 
+router.post('/register',
+  registerLimiter,
+  validateSchema(schemas.register),
   AuthController.register
 );
 
 // POST /api/auth/login - Inicio de sesión
-router.post('/login', 
-  loginLimiter, 
-  validateSchema(schemas.login), 
+router.post('/login',
+  loginLimiter,
+  validateSchema(schemas.login),
   AuthController.login
 );
 
 // ==================== RUTAS PROTEGIDAS ====================
 
 // GET /api/auth/profile - Obtener perfil del usuario
-router.get('/profile', 
-  authenticateToken, 
+router.get('/profile',
+  authenticateToken,
   AuthController.getProfile
 );
 
 // PUT /api/auth/profile - Actualizar perfil del usuario
-router.put('/profile', 
+router.put('/profile',
   authenticateToken,
   validateSchema(schemas.profileUpdate || schemas.register.fork(['email'], { optional: true })),
   AuthController.updateProfile
 );
 
 // POST /api/auth/change-password - Cambiar contraseña
-router.post('/change-password', 
+router.post('/change-password',
   authenticateToken,
   validateSchema(schemas.changePassword || {
     currentPassword: schemas.register.extract('password'),
@@ -49,8 +49,8 @@ router.post('/change-password',
 );
 
 // GET /api/auth/notifications - Obtener notificaciones del usuario
-router.get('/notifications', 
-  authenticateToken, 
+router.get('/notifications',
+  authenticateToken,
   AuthController.getNotifications
 );
 
