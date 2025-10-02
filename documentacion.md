@@ -1,13 +1,3 @@
-#  GUÍA DEFINITIVA PARA TU EXPOSICIÓN DE WEBSHIELD
-
-##  CONTEXTO CRÍTICO
-- **Exposición**: Mañana sobre idea de negocio + página web
-- **Problema**: Hiciste todo con IA, no programaste nada
-- **Lo que vieron en clase**: HTML, CSS, JavaScript básico
-- **Lo que usaste**: React, Node.js, Tailwind, PostgreSQL
-- **Riesgo**: Preguntas técnicas sobre el código
-
----
 ##  ESTRUCTURA DE TU PRESENTACIÓN (8-10 minutos)
 
 ### 1. APERTURA IMPACTANTE (1 minuto)
@@ -493,22 +483,7 @@ Lee en voz alta 5 veces cada respuesta preparada:
 
 ---
 
-##  ÚLTIMO CONSEJO
-
-**No necesitas ser un experto en React o PostgreSQL. Solo necesitas:**
-
-1.  Saber qué hace tu proyecto (ya lo sabes)
-2.  Poder demostrarlo funcionando (ya funciona)
-3.  Explicar la idea de negocio (ya tienes el modelo)
-4.  Tener respuestas preparadas para lo técnico (ahora las tienes)
-
-**Tu mayor ventaja**: Tienes un producto REAL funcionando EN LÍNEA. Muchos estudiantes solo tienen mockups o código que no funciona. Tú tienes algo que la gente podría usar HOY.
-
-Confía en eso. Muestra tu producto. Defiende tu negocio. Y si algo sale mal, recuerda: estás aprendiendo.
-
----
-
-##  RESUMEN ULTRA-RÁPIDO (Lee esto mañana antes de entrar)
+##  RESUMEN ULTRA-RÁPIDO 
 
 1. **Tu proyecto**: SaaS para crear webs con drag-and-drop
 2. **Stack**: React + Node + PostgreSQL + Tailwind
@@ -518,9 +493,4 @@ Confía en eso. Muestra tu producto. Defiende tu negocio. Y si algo sale mal, re
 6. **Demo**: Login → Plan → Dashboard → Editor → Guardar → Exportar
 7. **Si no sabes**: Usa frase salvavidas → Muestra demo → Habla de negocio
 8. **Diferencia con clase**: Mismos conceptos (HTML/CSS/JS) pero herramientas modernas
-9. **Tu ventaja**: Producto FUNCIONAL en producción
-10. **Respira**: En 24 horas esto habrá terminado y saldrá bien
 
----
-
-**¡Vas a hacerlo increíble! **
