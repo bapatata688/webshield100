@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Bell, X } from 'lucide-react';
+import { Bell } from 'lucide-react';
 import { SCREEN_TYPES, APP_CONFIG } from './constants/appConstants';
 import {
   createNewElement,
@@ -15,8 +15,8 @@ import PlansScreen from './components/PlansScreen';
 import EditorScreen from './components/EditorScreen';
 import PaymentModal from './components/PaymentModal';
 
+// Estados principales
 const WebShield = () => {
-  // Estados principales
   const [user, setUser] = useState(null);
   const [currentScreen, setCurrentScreen] = useState(SCREEN_TYPES.LOGIN);
   const [projects, setProjects] = useState([]);
@@ -30,26 +30,9 @@ const WebShield = () => {
   const [history, setHistory] = useState([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [isSaving, setIsSaving] = useState(false);
-
   // Estados para pagos
   const [showPayment, setShowPayment] = useState(false);
   const [selectedPlan, setSelectedPlan] = useState(null);
-
-  // Estado para detectar tamaño de pantalla
-  const [isMobile, setIsMobile] = useState(false);
-
-  // Detectar tamaño de pantalla
-  useEffect(() => {
-    const checkMobile = () => {
-      setIsMobile(window.innerWidth < 768);
-    };
-
-    checkMobile();
-    window.addEventListener('resize', checkMobile);
-
-    return () => window.removeEventListener('resize', checkMobile);
-  }, []);
-
   // Efectos de inicialización
   useEffect(() => {
     const token = localStorage.getItem(APP_CONFIG.STORAGE_KEY);
@@ -63,22 +46,6 @@ const WebShield = () => {
       loadProjects();
     }
   }, [user, currentScreen]);
-
-  // Función para remover notificación
-  const removeNotification = (id) => {
-    setNotifications(prev => prev.filter(n => n.id !== id));
-  };
-
-  // Auto-remover notificaciones después de 5 segundos
-  useEffect(() => {
-    if (notifications.length > 0) {
-      const timer = setTimeout(() => {
-        setNotifications(prev => prev.slice(1));
-      }, 5000);
-
-      return () => clearTimeout(timer);
-    }
-  }, [notifications]);
 
   // Funciones de carga
   const loadUserProfile = async () => {
@@ -127,6 +94,7 @@ const WebShield = () => {
     try {
       setLoading(true);
 
+      // Cargar proyecto completo con elementos
       const response = await projectsAPI.getById(project.id);
       console.log(' Proyecto completo recibido:', response);
 
@@ -151,7 +119,6 @@ const WebShield = () => {
       setLoading(false);
     }
   };
-
   const handlePlanSelect = (plan) => {
     console.log("Plan selected:", plan);
     setSelectedPlan(plan);
@@ -226,6 +193,7 @@ const WebShield = () => {
   const handleSave = async () => {
     console.log(' handleSave iniciado');
 
+    // Validar permisos del usuario
     const validation = validateUserPlan(user, 'save_project');
     if (!validation.allowed) {
       console.log(' Usuario no tiene permisos para guardar');
@@ -233,6 +201,7 @@ const WebShield = () => {
       return;
     }
 
+    // Validar que hay un proyecto activo
     if (!currentProject?.id) {
       console.log(' No hay proyecto activo');
       addNotification(setNotifications, 'Error: No hay proyecto activo para guardar.', 'error');
@@ -249,7 +218,11 @@ const WebShield = () => {
       console.log(' Project ID:', currentProject.id);
       console.log(' Project Name:', currentProject.name);
       console.log(' draggedElements:', draggedElements);
+      console.log(' Tipo de draggedElements:', typeof draggedElements);
+      console.log(' Es array?:', Array.isArray(draggedElements));
+      console.log(' Cantidad:', draggedElements?.length);
 
+      // Validación de draggedElements
       if (!draggedElements) {
         console.log(' draggedElements es null/undefined, usando array vacío');
         await projectsAPI.save(currentProject.id, []);
@@ -262,13 +235,27 @@ const WebShield = () => {
         throw new Error('Error interno: Los elementos no tienen el formato correcto');
       }
 
+      // Mostrar estructura de cada elemento
+      draggedElements.forEach((el, index) => {
+        console.log(`  Elemento ${index + 1}:`, {
+          type: el?.type,
+          hasSettings: !!el?.settings,
+          settingsKeys: el?.settings ? Object.keys(el.settings) : []
+        });
+      });
+
+      // Llamar al API
       const response = await projectsAPI.save(currentProject.id, draggedElements);
 
       addNotification(setNotifications, 'Proyecto guardado exitosamente!', 'success');
 
     } catch (error) {
-      console.error(' Error completo:', error);
+      console.error('Tipo de error:', error.constructor.name);
+      console.error('Mensaje:', error.message);
+      console.error('Stack:', error.stack);
+      console.error('Error completo:', error);
 
+      // Mensaje más específico para el usuario
       let userMessage = 'Error guardando proyecto';
       if (error.message.includes('array')) {
         userMessage = 'Error: Formato de datos incorrecto';
@@ -319,16 +306,11 @@ const WebShield = () => {
     }
   };
 
-  // Renderizado condicional con props de responsividad
+  // Renderizado condicional
   const renderCurrentScreen = () => {
-    const commonProps = {
-      isMobile,
-      isTablet: window.innerWidth >= 768 && window.innerWidth < 1024
-    };
-
     switch (currentScreen) {
       case SCREEN_TYPES.LOGIN:
-        return <LoginScreen onLogin={handleLogin} {...commonProps} />;
+        return <LoginScreen onLogin={handleLogin} />;
 
       case SCREEN_TYPES.DASHBOARD:
         return (
@@ -343,7 +325,6 @@ const WebShield = () => {
             loading={loading}
             setLoading={setLoading}
             onNavigateToPlans={() => setCurrentScreen(SCREEN_TYPES.PLANS)}
-            {...commonProps}
           />
         );
 
@@ -353,7 +334,6 @@ const WebShield = () => {
             user={user}
             onPlanSelect={handlePlanSelect}
             onBack={() => setCurrentScreen(user ? SCREEN_TYPES.DASHBOARD : SCREEN_TYPES.LOGIN)}
-            {...commonProps}
           />
         );
 
@@ -380,29 +360,22 @@ const WebShield = () => {
             onExport={handleExport}
             onPreview={setIsPreview}
             onBackToDashboard={() => setCurrentScreen(SCREEN_TYPES.DASHBOARD)}
-            onOpenPaymentModal={(plan) => {
+            onOpenPaymentModal={(plan) => {  // <-- AGREGAR ESTA LÍNEA
               setSelectedPlan(plan);
               setShowPayment(true);
             }}
             getDefaultContent={getDefaultContent}
-            {...commonProps}
           />
         );
       default:
-        return (
-          <div className="flex items-center justify-center min-h-screen">
-            <p className="text-gray-500">Pantalla no encontrada</p>
-          </div>
-        );
+        return <div>Pantalla no encontrada</div>;
     }
   };
 
+
   return (
-    <div className="min-h-screen bg-gray-50 font-sans overflow-x-hidden">
-      {/* Contenedor principal con scroll */}
-      <div className="h-screen overflow-y-auto overflow-x-hidden">
-        {renderCurrentScreen()}
-      </div>
+    <div className="min-h-screen bg-gray-50 font-sans">
+      {renderCurrentScreen()}
 
       {/* Modal de pago */}
       <PaymentModal
@@ -412,62 +385,25 @@ const WebShield = () => {
         setUser={setUser}
         onClose={() => setShowPayment(false)}
         onSuccess={handlePaymentSuccess}
-        isMobile={isMobile}
       />
 
-      {/* Notificaciones globales - Responsive */}
+      {/* Notificaciones globales */}
       {notifications.length > 0 && (
-        <div className={`
-          fixed z-50 
-          ${isMobile
-            ? 'top-2 left-2 right-2'
-            : 'top-4 right-4 max-w-md'
-          }
-        `}>
-          <div className="space-y-2">
-            {notifications.map(notification => (
-              <div
-                key={notification.id}
-                className={`
-                  p-3 sm:p-4 rounded-lg shadow-lg 
-                  flex items-center justify-between gap-2
-                  transform transition-all duration-300 ease-in-out
-                  ${notification.type === 'error'
-                    ? 'bg-red-500'
-                    : notification.type === 'success'
-                      ? 'bg-green-500'
-                      : 'bg-blue-500'
-                  } 
-                  text-white
-                  ${isMobile ? 'text-sm' : 'text-base'}
-                `}
-              >
-                <div className="flex items-center gap-2 flex-1 min-w-0">
-                  <Bell className={`${isMobile ? 'w-4 h-4' : 'w-5 h-5'} flex-shrink-0`} />
-                  <span className="truncate">{notification.message}</span>
-                </div>
-                <button
-                  onClick={() => removeNotification(notification.id)}
-                  className="flex-shrink-0 hover:bg-white/20 rounded p-1 transition-colors"
-                  aria-label="Cerrar notificación"
-                >
-                  <X className="w-4 h-4" />
-                </button>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
-
-      {/* Loader global */}
-      {loading && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-40 flex items-center justify-center">
-          <div className="bg-white rounded-lg p-6 sm:p-8 shadow-xl">
-            <div className="flex flex-col items-center gap-4">
-              <div className="w-12 h-12 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
-              <p className="text-gray-700 font-medium">Cargando...</p>
+        <div className="fixed top-4 right-4 z-50 space-y-2">
+          {notifications.map(notification => (
+            <div
+              key={notification.id}
+              className={`p-4 rounded-lg shadow-lg flex items-center space-x-2 ${notification.type === 'error'
+                ? 'bg-red-500'
+                : notification.type === 'success'
+                  ? 'bg-green-500'
+                  : 'bg-blue-500'
+                } text-white`}
+            >
+              <Bell className="w-4 h-4" />
+              <span>{notification.message}</span>
             </div>
-          </div>
+          ))}
         </div>
       )}
     </div>
