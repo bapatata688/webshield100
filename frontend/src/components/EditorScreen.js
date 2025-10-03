@@ -430,7 +430,13 @@ const EditorScreen = ({
                       price: '$9.99/mes'
                     })}
                   >¿Necesitas más poder?</h4>
-                  <p className="text-xs md:text-sm text-gray-600 mb-3 md:mb-4">
+                  <p className="text-xs md:text-sm text-gray-600 mb-3 md:mb-4"
+                    onClick={() => onOpenPaymentModal({
+                      id: 'pro',
+                      name: 'Profesional',
+                      price: '$9.99/mes'
+                    })}
+                  >
                     Desbloquea todos los elementos y funciones profesionales
                   </p>
                   <button
