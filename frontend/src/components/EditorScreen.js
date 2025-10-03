@@ -135,8 +135,8 @@ const EditorScreen = ({
                 onClick={onUndo}
                 disabled={historyIndex <= 0}
                 className={`editor-toolbar-button flex items-center px-3 py-2 rounded-lg font-medium transition-colors ${historyIndex <= 0
-                    ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                    : 'bg-gray-300 text-gray-700 hover:bg-gray-400'
+                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                  : 'bg-gray-300 text-gray-700 hover:bg-gray-400'
                   }`}
                 title="Deshacer"
               >
@@ -146,8 +146,8 @@ const EditorScreen = ({
                 onClick={onRedo}
                 disabled={historyIndex >= history.length - 1}
                 className={`editor-toolbar-button flex items-center px-3 py-2 rounded-lg font-medium transition-colors ${historyIndex >= history.length - 1
-                    ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
-                    : 'bg-gray-300 text-gray-700 hover:bg-gray-400'
+                  ? 'bg-gray-200 text-gray-400 cursor-not-allowed'
+                  : 'bg-gray-300 text-gray-700 hover:bg-gray-400'
                   }`}
                 title="Rehacer"
               >
@@ -160,8 +160,8 @@ const EditorScreen = ({
               onClick={onSave}
               disabled={!permissions.canSave || isSaving}
               className={`editor-toolbar-button flex items-center px-2 md:px-4 py-2 rounded-lg font-medium transition-colors text-xs md:text-sm ${permissions.canSave && !isSaving
-                  ? 'bg-green-600 text-white hover:bg-green-700 shadow-sm hover-lift'
-                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                ? 'bg-green-600 text-white hover:bg-green-700 shadow-sm hover-lift'
+                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                 }`}
             >
               {isSaving ? (
@@ -186,8 +186,8 @@ const EditorScreen = ({
               onClick={onExport}
               disabled={!permissions.canExport || loading}
               className={`hidden sm:flex editor-toolbar-button items-center px-3 md:px-4 py-2 rounded-lg font-medium transition-colors text-xs md:text-sm ${permissions.canExport && !loading
-                  ? 'bg-purple-600 text-white hover:bg-purple-700 shadow-sm hover-lift'
-                  : 'bg-gray-300 text-gray-500 cursor-not-allowed'
+                ? 'bg-purple-600 text-white hover:bg-purple-700 shadow-sm hover-lift'
+                : 'bg-gray-300 text-gray-500 cursor-not-allowed'
                 }`}
             >
               {loading ? (
@@ -423,7 +423,13 @@ const EditorScreen = ({
               <div className="editor-upgrade-card mt-4 md:mt-6 p-3 md:p-4 bg-gradient-to-br from-blue-50 to-purple-50 border border-blue-200 rounded-lg">
                 <div className="text-center">
                   <Crown className="w-8 h-8 md:w-10 md:h-10 text-purple-600 mx-auto mb-2 md:mb-3 bounce-animation" />
-                  <h4 className="font-medium text-gray-800 mb-2 text-sm md:text-base">¿Necesitas más poder?</h4>
+                  <h4 className="font-medium text-gray-800 mb-2 text-sm md:text-base"
+                    onClick={() => onOpenPaymentModal({
+                      id: 'pro',
+                      name: 'Profesional',
+                      price: '$9.99/mes'
+                    })}
+                  >¿Necesitas más poder?</h4>
                   <p className="text-xs md:text-sm text-gray-600 mb-3 md:mb-4">
                     Desbloquea todos los elementos y funciones profesionales
                   </p>
