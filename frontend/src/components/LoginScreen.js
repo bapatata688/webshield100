@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Shield, LogIn, UserPlus, Loader2 } from 'lucide-react';
+import React, { useState, useMemo } from 'react';
+import { Shield, LogIn, UserPlus, Loader2, Check, X } from 'lucide-react';
 import { authAPI } from '../api/config.js';
 import '../App.css';
 
@@ -8,10 +8,32 @@ const LoginScreen = ({ onLogin }) => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [showPasswordRequirements, setShowPasswordRequirements] = useState(false);
+
+  // Validación de requisitos de contraseña
+  const passwordRequirements = useMemo(() => {
+    return {
+      minLength: password.length >= 8,
+      hasUppercase: /[A-Z]/.test(password),
+      hasLowercase: /[a-z]/.test(password),
+      hasNumber: /\d/.test(password),
+      hasSymbol: /[@$!%*?&]/.test(password)
+    };
+  }, [password]);
+
+  const isPasswordValid = useMemo(() => {
+    return Object.values(passwordRequirements).every(req => req);
+  }, [passwordRequirements]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (email.trim() && password.trim()) {
+      // Validar contraseña solo en registro
+      if (!isLogin && !isPasswordValid) {
+        alert('La contraseña no cumple con todos los requisitos de seguridad');
+        return;
+      }
+
       try {
         setIsLoading(true);
         let response;
@@ -65,18 +87,82 @@ const LoginScreen = ({ onLogin }) => {
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
+              onFocus={() => !isLogin && setShowPasswordRequirements(true)}
+              onBlur={() => setShowPasswordRequirements(false)}
               className="login-input w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               placeholder="Mínimo 8 caracteres"
               required
               minLength="8"
               disabled={isLoading}
             />
+
+            {/* Indicadores de requisitos de contraseña */}
+            {!isLogin && (showPasswordRequirements || password.length > 0) && (
+              <div className="mt-3 p-3 bg-gray-50 rounded-lg border border-gray-200 space-y-2">
+                <p className="text-xs font-medium text-gray-700 mb-2">Requisitos de contraseña:</p>
+
+                <div className="flex items-center text-xs">
+                  {passwordRequirements.minLength ? (
+                    <Check className="w-4 h-4 text-green-600 mr-2 flex-shrink-0" />
+                  ) : (
+                    <X className="w-4 h-4 text-gray-400 mr-2 flex-shrink-0" />
+                  )}
+                  <span className={passwordRequirements.minLength ? 'text-green-700' : 'text-gray-600'}>
+                    Mínimo 8 caracteres
+                  </span>
+                </div>
+
+                <div className="flex items-center text-xs">
+                  {passwordRequirements.hasUppercase ? (
+                    <Check className="w-4 h-4 text-green-600 mr-2 flex-shrink-0" />
+                  ) : (
+                    <X className="w-4 h-4 text-gray-400 mr-2 flex-shrink-0" />
+                  )}
+                  <span className={passwordRequirements.hasUppercase ? 'text-green-700' : 'text-gray-600'}>
+                    Una letra mayúscula
+                  </span>
+                </div>
+
+                <div className="flex items-center text-xs">
+                  {passwordRequirements.hasLowercase ? (
+                    <Check className="w-4 h-4 text-green-600 mr-2 flex-shrink-0" />
+                  ) : (
+                    <X className="w-4 h-4 text-gray-400 mr-2 flex-shrink-0" />
+                  )}
+                  <span className={passwordRequirements.hasLowercase ? 'text-green-700' : 'text-gray-600'}>
+                    Una letra minúscula
+                  </span>
+                </div>
+
+                <div className="flex items-center text-xs">
+                  {passwordRequirements.hasNumber ? (
+                    <Check className="w-4 h-4 text-green-600 mr-2 flex-shrink-0" />
+                  ) : (
+                    <X className="w-4 h-4 text-gray-400 mr-2 flex-shrink-0" />
+                  )}
+                  <span className={passwordRequirements.hasNumber ? 'text-green-700' : 'text-gray-600'}>
+                    Un número
+                  </span>
+                </div>
+
+                <div className="flex items-center text-xs">
+                  {passwordRequirements.hasSymbol ? (
+                    <Check className="w-4 h-4 text-green-600 mr-2 flex-shrink-0" />
+                  ) : (
+                    <X className="w-4 h-4 text-gray-400 mr-2 flex-shrink-0" />
+                  )}
+                  <span className={passwordRequirements.hasSymbol ? 'text-green-700' : 'text-gray-600'}>
+                    Un símbolo (@$!%*?&)
+                  </span>
+                </div>
+              </div>
+            )}
           </div>
 
           <button
             type="submit"
-            disabled={isLoading}
-            className="login-button w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center font-medium disabled:opacity-50"
+            disabled={isLoading || (!isLogin && !isPasswordValid && password.length > 0)}
+            className="login-button w-full bg-blue-600 text-white py-3 px-4 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center font-medium disabled:opacity-50 disabled:cursor-not-allowed"
             style={{ animationDelay: '0.4s' }}
           >
             {isLoading ? (
