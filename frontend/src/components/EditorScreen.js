@@ -423,20 +423,10 @@ const EditorScreen = ({
               <div className="editor-upgrade-card mt-4 md:mt-6 p-3 md:p-4 bg-gradient-to-br from-blue-50 to-purple-50 border border-blue-200 rounded-lg">
                 <div className="text-center">
                   <Crown className="w-8 h-8 md:w-10 md:h-10 text-purple-600 mx-auto mb-2 md:mb-3 bounce-animation" />
-                  <h4 className="font-medium text-gray-800 mb-2 text-sm md:text-base"
-                    onClick={() => onOpenPaymentModal({
-                      id: 'pro',
-                      name: 'Profesional',
-                      price: '$9.99/mes'
-                    })}
-                  >¿Necesitas más poder?</h4>
-                  <p className="text-xs md:text-sm text-gray-600 mb-3 md:mb-4"
-                    onClick={() => onOpenPaymentModal({
-                      id: 'pro',
-                      name: 'Profesional',
-                      price: '$9.99/mes'
-                    })}
-                  >
+                  <h4 className="font-medium text-gray-800 mb-2 text-sm md:text-base">
+                    ¿Necesitas más poder?
+                  </h4>
+                  <p className="text-xs md:text-sm text-gray-600 mb-3 md:mb-4">
                     Desbloquea todos los elementos y funciones profesionales
                   </p>
                   <button
@@ -445,14 +435,13 @@ const EditorScreen = ({
                       name: 'Profesional',
                       price: '$9.99/mes'
                     })}
-                    className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-2 md:py-3 px-4 rounded-lg hover:from-blue-700 hover:to-purple-700 text-xs md:text-sm font-medium transition-all shadow-sm hover-lift"
+                    className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-2 md:py-3 px-4 rounded-lg hover:from-blue-700 hover:to-purple-700 text-xs md:text-sm font-medium transition-all shadow-sm hover-lift active:scale-95"
                   >
                     Actualizar Plan
                   </button>
                 </div>
               </div>
             )}
-
             {/* Security Badge - Collapsible on mobile */}
             <div className="editor-security-badge mt-4 md:mt-6">
               <button
