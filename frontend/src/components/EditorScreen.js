@@ -418,7 +418,7 @@ const EditorScreen = ({
               </div>
             )}
 
-            {/* Upgrade Card - Collapsible on mobile */}
+            {/* plan card - Collapsible on mobile */}
             {user?.plan === 'free' && (
               <div className="editor-upgrade-card mt-4 md:mt-6 p-3 md:p-4 bg-gradient-to-br from-blue-50 to-purple-50 border border-blue-200 rounded-lg">
                 <div className="text-center">
@@ -430,28 +430,17 @@ const EditorScreen = ({
                     Desbloquea todos los elementos y funciones profesionales
                   </p>
                   <button
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      onOpenPaymentModal({
-                        id: 'pro',
-                        name: 'Profesional',
-                        price: '$9.99/mes'
-                      });
-                    }}
-                    onTouchEnd={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      onOpenPaymentModal({
-                        id: 'pro',
-                        name: 'Profesional',
-                        price: '$9.99/mes'
-                      });
-                    }}
-                    style={{ touchAction: 'manipulation' }}
-                    className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-2 md:py-3 px-4 rounded-lg hover:from-blue-700 hover:to-purple-700 text-xs md:text-sm font-medium transition-all shadow-sm hover-lift active:scale-95 cursor-pointer"
+                    onClick={() => onOpenPaymentModal({
+                      id: 'pro',
+                      name: 'Profesional',
+                      price: '$9.99/mes'
+                    })}
+                    className="relative z-50 w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-2 md:py-3 px-4 rounded-lg hover:from-blue-700 hover:to-purple-700 text-xs md:text-sm font-medium transition-all shadow-sm hover-lift active:scale-95"
                   >
                     Actualizar Plan
-                  </button>                </div>
+                  </button>
+
+                </div>
               </div>
             )}
             {/* Security Badge - Collapsible on mobile */}
