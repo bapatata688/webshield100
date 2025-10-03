@@ -430,16 +430,28 @@ const EditorScreen = ({
                     Desbloquea todos los elementos y funciones profesionales
                   </p>
                   <button
-                    onClick={() => onOpenPaymentModal({
-                      id: 'pro',
-                      name: 'Profesional',
-                      price: '$9.99/mes'
-                    })}
-                    className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-2 md:py-3 px-4 rounded-lg hover:from-blue-700 hover:to-purple-700 text-xs md:text-sm font-medium transition-all shadow-sm hover-lift active:scale-95"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onOpenPaymentModal({
+                        id: 'pro',
+                        name: 'Profesional',
+                        price: '$9.99/mes'
+                      });
+                    }}
+                    onTouchEnd={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      onOpenPaymentModal({
+                        id: 'pro',
+                        name: 'Profesional',
+                        price: '$9.99/mes'
+                      });
+                    }}
+                    style={{ touchAction: 'manipulation' }}
+                    className="w-full bg-gradient-to-r from-blue-600 to-purple-600 text-white py-2 md:py-3 px-4 rounded-lg hover:from-blue-700 hover:to-purple-700 text-xs md:text-sm font-medium transition-all shadow-sm hover-lift active:scale-95 cursor-pointer"
                   >
                     Actualizar Plan
-                  </button>
-                </div>
+                  </button>                </div>
               </div>
             )}
             {/* Security Badge - Collapsible on mobile */}
